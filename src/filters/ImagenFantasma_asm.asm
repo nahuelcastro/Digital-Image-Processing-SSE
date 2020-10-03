@@ -8,8 +8,8 @@ global ImagenFantasma_asm
 %define height [rsp + 16]
 
 ImagenFantasma_asm:
-;RSI -> *src
-;RDI -> *dst
+;RDI -> *src
+;RSI -> *dst
 ;EDX -> width
 ;ECX -> height
 ;R8D  -> src_row_size
@@ -41,9 +41,8 @@ xor ecx, ecx
     mov rax, width
     mul r13d                       ; rax <- width * r13d
     add edx, rax                   ; edx <- [r12d * 4 + width * r13d]
-    pmovzxbd xmm0, [rsi + edx]     ; xmm0 : [ a_ext | r_ext | g_ext | b_ext ]
-
-    pmovzxbd xmm1, [rsi + edx + 4] ; xmm1 : [ a_ext | r_ext | g_ext | b_ext ]
+    pmovzxbd xmm0, [rdi + edx]     ; xmm0 : [ a_ext | r_ext | g_ext | b_ext ]
+    pmovzxbd xmm1, [rdi + edx + 4] ; xmm1 : [ a_ext | r_ext | g_ext | b_ext ]
 
     ; Calculamos ii y jj
     div r12d, 2          ;devuelve en rax
@@ -54,65 +53,54 @@ xor ecx, ecx
     add rax, offsetY
     mov r15d, rax
 
-
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
     lea edx, [r15d * 4 + offsetX]
     mov rax, width
     mul edx                        ; rax <- (r15d * 4 + offsetY) * width
     add rax, r14d                  ; rax <- rax + r14d
     add rax, offsetX               ; rax <- rax +  offsetX
-    pmovzxbd xmm3, [rsi + rax]     ; xmm3 : [ aaa | rrr | ggg | bbb ]
-    pmovzxbd xmm4, [rsi + rax]     ; xmm4 : [ aaa | rrr | ggg | bbb ]
+    pmovzxbd xmm3, [rdi + rax]     ; xmm3 : [ aaa | rrr | ggg | bbb ]
+    pmovzxbd xmm4, [rdi + rax + 4] ; xmm4 : [ aaa | rrr | ggg | bbb ]
 
-    ; float b = (rrr + 2 * ggg + bbb)/4;
-    xorps xmm5, xmm5
-    ; Creo registro: [  1  |  1  |  2  |  1  ]
+    creoB:
+      xorps xmm5, xmm5
 
-    uno    : times 16 db 1
-    movdqu xmm6, [uno]
-    add [xmm6 + 64], 1
+      ; Creo registro: [  1  |  1  |  2  |  1  ]
+      uno    : times 16 db 1
+      movdqu xmm6, [uno]
+      add [xmm6 + 64], 1
 
-    mulps xmm3, xmm6    ; xmm3 : [ aaa | rrr | 2gg | bbb ]
-    mulps xmm4, xmm6    ; xmm4 : [ aaa | rrr | 2gg | bbb ]
+      mulps xmm3, xmm6    ; xmm3 : [ aaa | rrr | 2ggg | bbb ]
+      mulps xmm4, xmm6    ; xmm4 : [ aaa | rrr | 2ggg | bbb ]
 
-    haddps xmm3, xmm4   ; [ aaa + rrr | 2ggg + bbb | aaa + rrr | 2ggg + bbb ]
+      pslldq xmm3, 4 ; xmm3 : [ rrr | 2ggg | bbb |  0  ]
+      pslldq xmm4, 4 ; xmm4 : [ rrr | 2ggg | bbb |  0  ]
 
+      haddps xmm3, xmm4   ; xmm3 : [ rrr + 2ggg | bbb + 000 | rrr + 2ggg | bbb + 000 ]
+      xor xmm7, xmm7
+      haddps xmm3, xmm7   ; xmm3 : [     0      |      0     |     b1    |     b0     ]
 
-
-
-    ; tiene que quedar asi, el xmm5 ↓↓↓↓↓↓↓
-    ; xmm5 : [ ? | ? | b1 | b0 ]
-
-
-    ; Creo registro: [  1  |  1  |  2  |  1  ]
-    ; uno    : times 16 db 1
-    ; movdqu xmm6, [uno]
-    ; add [xmm6 + 64], 1
-
-    ; xmm3 : [ aaa | rrr | ggg | bbb ]
-    ; xmm6 : [ 1   | 1   | 2   | 1   ]
-
-    ; xmm4 : [ aaa | rrr | ggg | bbb ]
-    ; xmm6 : [ 1   | 1   | 2   | 1   ]
+      dos    : times 16 db 2
+      movdqu xmm6, [dos]
+      divps xmm3, xmm6    ; xmm3 : [     0      |      0     |     b1/2   |     b0/2   ]
 
 
-    ; xmm3           : [ aaa | rrr | 2gg | bbb  ]
-    ; shfl xmm3      : [ rrr | 2gg | bbb | 000  ]
-    ; xmm4           : [ aaa | rrr | 2gg | bbb  ]
-    ; shfl xmm4      : [    rrr  | 2gg   | bbb     | 000   ]
-    ; hadd xmm3 xmm4 : [ 2gg+rrr | 0+bbb | 2gg+rrr | 0+bbb ]
-    ;
+    alfa    : times 16 dd 0.9
+    movdqu xmm6, [alfa]
+
+    mulps xmm0, xmm6 ; xmm0 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
+    mulps xmm1, xmm6 ; xmm1 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
+
+    ; COMO NO SE NOS OCURRIÓ, HICIMOS CABEZEADAS
+    cabezeada1: times 16 dd [xmm3 + 96]
+    movdqu xmm6, [cabezeada1]
+    addps xmm0, xmm6
+    cabezeada2: times 16 dd [xmm3 + 64]
+    movdqu xmm6, [cabezeada2]
+    addps xmm1, xmm6
+    packusdw xmm0, xmm1 ; xmm0: [ aa*0.9+b1/2 | rr*0.9+b1/2 | gg*0.9+b1/2 | bb*0.9+b1/2 | aa*0.9+b0/2 | rr*0.9+b0/2 | gg*0.9+b0/2 | bb*0.9+b0/2 ]
 
 
-    ; add xmm3 xmm4 : []
-
-    hadd xmm3, xmm3
-
-    repiteindo
-    ; hadd : [ ??? | ??? |    b1   |   b0   ]
-
-
-    ; divp : [ ??? | ??? | b1 / 4 | b0 / 4 ]
 
 
     inc r12d
@@ -129,28 +117,3 @@ xor ecx, ecx
     pop r12
     sub rsp, 16
     ret
-
-
-
-; registro + i*iter + j*iter [adasdasdas ------------------- asdasdasdasdas]
-;  (pos + 2 * [pos+32] + pos+32*2)/4
-
-
-
-; Poner en un registro xmmx el número 0.9 extendido en 32 bits
-
-
-
-
-/*
-
-movdqu xmm0, [rbx + rcx*2*4]  ; xmm0: [ y1 | x1 | y0 | x0 ]
-mulps xmm0, xmm0    ; xmm0: [ y1*y1 | x1*x1 | y0*y0 | x0*x0 ]
-movdqu xmm1, [rbx + rcx*2*4 + 16]  ; xmm1: [ y3 | x3 | y2 | x2 ]
-mulps xmm1, xmm1    ; xmm1: [ y4*y4 | x3*x3 | y2*y2 | x2*x2 ]
-
-haddps xmm0, xmm1   ; [ y3*y3 + x3*x3 | y2*y2 + x2*x2 | y1*y1 + x1*x1 | y0*y0 + x0*x0 ]
-sqrtps xmm0, xmm0   ; [ sqrt(y3*y3 + x3*x3) | sqrt(y2*y2 + x2*x2) | sqrt(y1*y1 + x1*x1) | sqrt(y0*y0 + x0*x0) ]
-movdqu [rax + rcx * 4], xmm0
-
-*/
