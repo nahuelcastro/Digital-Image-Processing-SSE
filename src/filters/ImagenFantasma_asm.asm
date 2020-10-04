@@ -66,7 +66,8 @@ xor ecx, ecx
       xorps xmm5, xmm5
 
       ; Creo registro: [  1  |  1  |  2  |  1  ]
-      uno    : times 16 db 1
+      uno    : times 4 dd 1
+      ;uno    : times 16 db 1
       movdqu xmm6, [uno]
       add [xmm6 + 64], 1
 
@@ -77,39 +78,46 @@ xor ecx, ecx
       pslldq xmm4, 4 ; xmm4 : [ rrr | 2ggg | bbb |  0  ]
 
       haddps xmm3, xmm4   ; xmm3 : [ rrr + 2ggg | bbb + 000 | rrr + 2ggg | bbb + 000 ]
-      xor xmm7, xmm7
+      xorps xmm7, xmm7
       haddps xmm3, xmm7   ; xmm3 : [     0      |      0     |     b1    |     b0     ]
 
-      dos    : times 16 db 2
+      dos    : times 4 dd 8
+      ;dos    : times 16 db 2
       movdqu xmm6, [dos]
-      divps xmm3, xmm6    ; xmm3 : [     0      |      0     |     b1/2   |     b0/2   ]
+      divps xmm3, xmm6    ; xmm3 : [     0      |      0     |     b1/8   |     b0/8   ]
 
 
-    alfa    : times 16 dd 0.9
+    alfa    : times 4 dd 0.9
     movdqu xmm6, [alfa]
-
-    mulps xmm0, xmm6 ; xmm0 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
-    mulps xmm1, xmm6 ; xmm1 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
+    add [xmm6 + 0] , 0.1  ; ver si xmm6 va con corchetes
+    mulps xmm0, xmm6      ; xmm0 : [  aa * 1    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
+    mulps xmm1, xmm6      ; xmm1 : [  aa * 1    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
 
     ; COMO NO SE NOS OCURRIÓ, HICIMOS CABEZEADAS
-    cabezeada1: times 16 dd [xmm3 + 96]
+    cabezeada1: times 4 dd [xmm3 + 96]
+    ;cabezeada1: times 16 dd [xmm3 + 96]
     movdqu xmm6, [cabezeada1]
+    movd  [xmm6 + 0], 0                   ; ver si xmm6 va con corchetes
     addps xmm0, xmm6
-    cabezeada2: times 16 dd [xmm3 + 64]
+    cabezeada2: times 4 dd [xmm3 + 64]
+    ;cabezeada2: times 16 dd [xmm3 + 64]
     movdqu xmm6, [cabezeada2]
+    movd  [xmm6 + 0], 0                   ; ver si xmm6 va con corchetes
     addps xmm1, xmm6
-    packusdw xmm0, xmm1 ; xmm0: [ aa*0.9+b1/2 | rr*0.9+b1/2 | gg*0.9+b1/2 | bb*0.9+b1/2 | aa*0.9+b0/2 | rr*0.9+b0/2 | gg*0.9+b0/2 | bb*0.9+b0/2 ]
+    packssdw xmm0, xmm1 ; xmm0: [    aa    | rr*0.9+b1/2 | gg*0.9+b1/2 | bb*0.9+b1/2 |    aa    | rr*0.9+b0/2 | gg*0.9+b0/2 | bb*0.9+b0/2 ]
+    xorps xmm7, xmm7
+    packusdw xmm0, xmm7
 
+    movq [rsi], xmm0
+    add rsi, 8
 
-
-
-    inc r12d
+    add r12d, 2
     cmp r12d, edx
     jl cicloWidth:
 
-    inc r13d
-    cmp r13d, ecx
-    jl cicloWidth:
+  inc r13d
+  cmp r13d, ecx
+  jl cicloWidth:
 
     pop r15
     pop r14
