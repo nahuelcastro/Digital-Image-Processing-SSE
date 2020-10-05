@@ -1,15 +1,10 @@
 extern ImagenFantasma_c
 global ImagenFantasma_asm
 
-%define offsetX [rbp + 16]
-%define offsetY [rbp + 24]
-
-%define width [rsp + 8]
-%define height [rsp + 16]
 
 .rodata:
 
-unob    : times 12 db 255.0
+;unob    : times 12 db 255.0
 alfa    : times 4 dd 0.9
 uno     : times 4 dd 1.0
 ;mascara : dq 0x0000000100000000
@@ -30,19 +25,22 @@ ImagenFantasma_asm:
 ;armo stackFrame
 push rbp
 mov rbp, rsp
-sub rsp, 32
+sub rsp, 40
 push r11
 push r12  ;contador Height
 push r13  ;contador width
 push r14  ; ii
 push r15  ; jj
 
+%define offsetX [rbp + 16]
+%define offsetY [rbp + 24]
+
+%define width [rsp + 8]
+%define height [rsp + 16]
 
 mov width, edx
 mov height, ecx
 
-; xor rdx, rdx
-; xor ecx, ecx
 
 xor r13,r13
 .cicloHeight:
@@ -65,14 +63,16 @@ xor r13,r13
 
     ; Calculamos ii y jj
     mov eax, r12d
-    xor r11, r11
-    mov r11d, 2h
-    fdiv r11d           ;devuelve en rax     ;;;
+    xor r11d, r11d
+    mov r11d, 0x2
+    cdq
+    div r11d           ;devuelve en rax     ;;;
     add eax, offsetX
     mov r14d, eax
 
     mov eax, r13d
-    fdiv r11d
+    cdq
+    div r11d
     add eax, offsetY
     mov r15d, eax
 
@@ -89,7 +89,7 @@ xor r13,r13
     pmovzxbd xmm3, [rdi + r11]     ; xmm3 : [ aaa | rrr | ggg | bbb ]
     pmovzxbd xmm4, [rdi + r11 + 4] ; xmm4 : [ aaa | rrr | ggg | bbb ]
 
-    .creoB:
+    ;.creoB:
       xorps xmm5, xmm5
       ; Creo registro: [  1  |  1  |  2  |  1  ]
       movdqu xmm6, [uno]
@@ -110,11 +110,9 @@ xor r13,r13
       xorps xmm7, xmm7
       haddps xmm3, xmm7   ; xmm3 : [     0      |      0     |     b1    |     b0     ]
 
-
       ;dos    : times 16 db 2
       movdqu xmm6, [ocho]
       divps xmm3, xmm6    ; xmm3 : [     0      |      0     |     b1/8   |     b0/8   ]
-
 
     movdqu xmm9,xmm0
     movdqu xmm10,xmm1
@@ -123,10 +121,9 @@ xor r13,r13
     mulps xmm0, xmm6      ; xmm0 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
     mulps xmm1, xmm6      ; xmm1 : [  aa * 0.9    |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ]
 
-
-
     xorps xmm8, xmm8
-    pmovzxbd xmm8, [unob]    ;xmm8 : [  0  |   1    |    1   |    1    ]
+    movdqu xmm8, [uno]       ;xmm8 : [  1  |   1    |    1   |    1    ]
+    psrldq xmm8, 4           ;xmm8 : [  0  |   1    |    1   |    1    ]
     andps xmm0, xmm8         ;xmm0 : [  0  |rr * 0.9|gg * 0.9|bb * 0.9 ]
     andnps xmm9, xmm8        ;xmm9 : [ aa  |    0   |    0   |    0    ]
     orps xmm0, xmm9          ;xmm0 : [ aa  |rr * 0.9|gg * 0.9|bb * 0.9 ]
@@ -162,27 +159,25 @@ xor r13,r13
   cmp dword r13d, height
   jl .cicloHeight
 
+    add rsp, 40
     pop r15
     pop r14
     pop r13
     pop r12
     pop r11
-    sub rsp, 32
+    pop rbp
     ret
-
-
 
 ;gdb --args tp2 ImagenFantasma -i asm ../img/NottingHill.bmp 0 0
 
+;b ImagenFantasma_asm.cicloHeight if $r13 == 0x2cf
 
-
+;b ImagenFantasma_asm.cicloWidth if $r12 == 0x4fe
 
 ;
-
     ; mov [rsp+32], 0000
     ; movd [rsp+36], 00000000h
     ; movss [rsp+40], 3f800000h ; 1.0
     ; movd [rsp+44], 00000000h
-    ;
     ; movss xmm6, [rsp+32]
 ;
