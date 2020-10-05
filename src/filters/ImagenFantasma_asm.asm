@@ -38,23 +38,21 @@ push r14  ; ii
 push r15  ; jj
 
 
-
-movdqu xmm6, [uno]
-psrldq xmm6, 12  ; 0 0 0 1
-pslldq xmm6, 4  ; 0 0 1 0
-
-
 mov width, edx
 mov height, ecx
 
-xor rdx, rdx
-xor ecx, ecx
+; xor rdx, rdx
+; xor ecx, ecx
 
 xor r13,r13
 .cicloHeight:
 
   xor r12, r12
   .cicloWidth:
+
+    xor rdx, rdx
+    xor ecx, ecx
+
     ; rsi + r12d * 4 + r13d * width
     lea edx, [r12d * 4]
     mov eax, width
@@ -68,13 +66,13 @@ xor r13,r13
     ; Calculamos ii y jj
     mov eax, r12d
     xor r11, r11
-    mov r11d, 2
-    div r11d           ;devuelve en rax
+    mov r11d, 2h
+    fdiv r11d           ;devuelve en rax     ;;;
     add eax, offsetX
     mov r14d, eax
 
     mov eax, r13d
-    div r11d
+    fdiv r11d
     add eax, offsetY
     mov r15d, eax
 
@@ -93,17 +91,15 @@ xor r13,r13
 
     .creoB:
       xorps xmm5, xmm5
-
       ; Creo registro: [  1  |  1  |  2  |  1  ]
       movdqu xmm6, [uno]
       xorps xmm10, xmm10
-      movdqu xmm10, [unofin]
-      pslldq xmm10, 4
+      movdqu xmm10, [uno]
+      psrldq xmm10, 12  ; 0 0 0 1
+      pslldq xmm10, 4  ;  0 0 1 0
+      ; movdqu xmm10, [unofin]
+      ; pslldq xmm10, 4
       addps xmm6, xmm10
-
-      ; myMask:
-      ; .long 0x00000001, 0x00000001, 0x00000002, 0xffffffff
-
       mulps xmm3, xmm6    ; xmm3 : [ aaa | rrr | 2ggg | bbb ]
       mulps xmm4, xmm6    ; xmm4 : [ aaa | rrr | 2ggg | bbb ]
 
@@ -159,11 +155,11 @@ xor r13,r13
     add rsi, 8
 
     add r12d, 2
-    cmp r12d, edx
+    cmp dword r12d, width
     jl .cicloWidth
 
   inc r13d
-  cmp r13d, ecx
+  cmp dword r13d, height
   jl .cicloHeight
 
     pop r15
