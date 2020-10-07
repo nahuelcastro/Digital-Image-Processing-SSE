@@ -7,7 +7,8 @@ global ImagenFantasma_asm
 .rodata:
 
 ;unob    : times 12 db 255.0
-_09:  dd 1.0, 9.0, 9.0, 9.0
+_09:  dd 1.0, 0.9, 0.9, 0.9
+;_09:  dd 0.9, 0.9, 0.9, 1.0
 uno:  times 16 db 1.0
 ;mascara : dq 0x0000000100000000
 ocho:   times 4 dd 8.0
