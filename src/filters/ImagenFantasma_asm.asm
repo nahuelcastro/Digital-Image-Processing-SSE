@@ -2,7 +2,7 @@ extern ImagenFantasma_c
 global ImagenFantasma_asm
 
 %define pixel_size 4
-%define d_pixel_size 4
+%define d_pixel_size 8
 
 .rodata:
 
@@ -87,7 +87,7 @@ xor r13,r13
     xor r11d, r11d
     mov r11d, 0x2
     cdq
-    div r11d           ;devuelve en rax     ;;;
+    div r11d           ;devuelve en rax     ;;; fafv
     add eax, offsetX
     mov r14d, eax   ;ii
 
@@ -197,9 +197,9 @@ xor r13,r13
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
     movq [rsi], xmm9
-    add rsi, 16
+    add rsi, 8 ; 16 tiene logica
 
-    add r12d, 4
+    add r12d, 2 ; 4 tiene logica
     cmp dword r12d, width
     jl .cicloWidth
 
