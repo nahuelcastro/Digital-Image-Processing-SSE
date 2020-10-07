@@ -7,13 +7,15 @@ global ImagenFantasma_asm
 .rodata:
 
 ;unob    : times 12 db 255.0
-_09:  dd 1.0, 0.9, 0.9, 0.9
-;_09:  dd 0.9, 0.9, 0.9, 1.0
+_09:  dd 0.9, 0.9, 0.9,1.0
 uno:  times 16 db 1.0
 ;mascara : dq 0x0000000100000000
 ocho:   times 4 dd 8.0
 unofin: times 1 dd 1.0
-mask: dw 0,1,2,1,0,1,2,1
+;mask: dw 1,2,1,0,1,2,1,0
+;mask_filter_a: db 1,1,1,0,1,1,1,0
+mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
+
 
 .text:
 
@@ -55,16 +57,30 @@ xor r13,r13
     xor rdx, rdx
     xor ecx, ecx
 
-    ; rsi + r12d * 4 + r13d * width
-    lea edx, [r12d * 4]
-    mov eax, width
-    mul r12d                       ; rax <- width * r12d
-    add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
-    xor r11, r11
-    mov r11d, edx
+    ;calculamos rr , gg , bb (para 4 pixeles)
 
-    pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-    pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+
+    ;VERSION JUAN
+    ;rsi + r12d * 4 + r13d * width * 4
+    lea edx, [r13d * 4]
+    mov eax, width
+    mul edx                         ; eax <- width * r13d * 4
+    lea eax, [eax + r12d * 4]
+    xor r11, r11
+    mov r11d, eax
+
+
+    ;ANTERIOR
+    ; ;rsi + r12d * 4 + r13d * width
+    ; lea edx, [r12d * 4]
+    ; mov eax, width
+    ; mul r12d                       ; rax <- width * r12d
+    ; add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
+    ; xor r11, r11
+    ; mov r11d, edx
+
+    pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ aa_1 | rr_1 | gg_1 | bb_1 | aa_0 | rr_0 | gg_0 | bb_0 ]
+    pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
 
     ; Calculamos ii y jj
     mov eax, r12d
@@ -73,52 +89,69 @@ xor r13,r13
     cdq
     div r11d           ;devuelve en rax     ;;;
     add eax, offsetX
-    mov r14d, eax
+    mov r14d, eax   ;ii
 
     mov eax, r13d
     cdq
     div r11d
     add eax, offsetY
-    mov r15d, eax
+    mov r15d, eax ;jj
 
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
-    xor r11, r11
-    mov r11d, offsetX
-    lea edx, [r11d + r15d * 4]     ; edx <- offsetX * ii * tamaño pixel
+
+    ;VERSION JUAN
+    lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
     mov rax, width
-    mul edx                        ; rax <- (r15d * 4 + offsetY) * width
-    add eax, r14d                  ; rax <- rax + r14d
-    add eax, offsetX               ; rax <- rax +  offsetX
+    mul edx                        ; eax <- (jj * 4) * width
+    lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
+
+    ;ANTERIOR
+    ; lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
+    ; mov rax, width
+    ; mul edx                        ; rax <- (jj * 4) * width
+    ; add eax, r14d                  ; rax <- rax + r14d
+    ; xor r11, r11
+    ; mov r11d, eax
+
 
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + d_pixel_size]     ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
 
-  ; hasta aca todo oki :) ?
     ;creamos B
-    movdqu xmm4, [mask] ; xmm4 :  [   0  |    1  |    2    |    1   |   0    |     1    |    2    |    1   ]
-    mulps xmm2, xmm4    ; xmm2 :  [   0  |   rg  |   2gg   |   bg   |   0    |    rg    |   2gg   |   bg   ]
-    mulps xmm3, xmm4    ; xmm3 :  [   0  |   rg  |   2gg   |   bg   |   0    |    rg    |   2gg   |   bg   ]
+    pxor xmm4, xmm4
+    pblendw xmm2, xmm4, 0x88      ; xmm2 :  [   0  |   rg |   gg  |   bg   |   0    |    rg    |   gg   |   bg   ]
+    pxor xmm12, xmm12
+    pblendw xmm12, xmm2, 0x22     ; xmm12 : [   0  |   0  |    gg   |   0    |   0    |    0     |    gg   |   0   ]
+    paddw xmm2, xmm12           ; xmm2 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
 
-    phaddsw xmm2, xmm3   ; xmm2 : [(0+r)_4|(2g+b)_4|(0+r)_3 |(2g+b)_3|(0+r)_2 | (2g+b)_2 | (0+r)_1 | (b+2g)_1]
+    pxor xmm4, xmm4
+    pblendw xmm3, xmm4, 0x88      ; xmm2 :  [   0  |   rg |   gg  |   bg   |   0    |    rg    |   gg   |   bg   ]
+    pxor xmm12, xmm12
+    pblendw xmm12, xmm3, 0x22     ; xmm12 : [   0  |   0  |    gg   |   0    |   0    |    0     |    gg   |   0   ]
+    paddw xmm3, xmm12             ; xmm3 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
+
+; hasta aca todo oki :) ?
+
+    phaddsw xmm2, xmm3   ; xmm2 : [(0+r)_3|(2g+b)_3|(0+r)_2 |(2g+b)_2|(0+r)_1 | (2g+b)_1 | (0+r)_0 | (b+2g)_0]
     xorps xmm5, xmm5
-    phaddsw xmm5, xmm2   ; xmm5 : [   0   |    0   |    0   |    0   |   B3   |    B2    |    B1   |   B0   ]
+    phaddsw xmm2, xmm5   ; xmm5 : [   0   |    0   |    0   |    0   |   B3   |    B2    |    B1   |   B0   ]
 
 ; estos bx no estan divididos por cuatro, lo hacemos despues directo por 8
     movdqu xmm6, [ocho]
-    pmovzxwd xmm7, xmm5 ; xmm7 : [      B3       |       B2      |      B1    |      B0    ]
+    pmovzxwd xmm7, xmm2 ; xmm7 : [      B3       |       B2      |      B1    |      B0    ]
     cvtdq2ps xmm7, xmm7 ; convierto int_32 a float
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
     ;cvtps2dq xmm7, xmm7 ; convierto float a int_32
 
     pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
-    psrlw xmm0, 4
+    psrldq xmm0, 8
     pmovzxwd xmm10, xmm0   ; xmm10 : [aa_ext | rr_ext | gg_ext | bb_ext ] (2do px)
 
     pmovzxwd xmm11, xmm1   ; xmm11 : [aa_ext | rr_ext | gg_ext | bb_ext ] (3er px)
-    psrlw xmm1, 4
+    psrldq xmm1, 8
     pmovzxwd xmm12, xmm1   ; xmm12 : [aa_ext | rr_ext | gg_ext | bb_ext ] (4do px)
 
     cvtdq2ps xmm9, xmm9   ; convierto int_32 a float
@@ -156,12 +189,14 @@ xor r13,r13
     cvtps2dq xmm11, xmm11 ; convierto float a int_32
     cvtps2dq xmm12, xmm12 ; convierto float a int_32
 
+
+
     packssdw xmm9, xmm10
     packssdw xmm11, xmm12
 
-    packuswb xmm9, xmm11
+    packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
-    movq [rsi], xmm11
+    movq [rsi], xmm9
     add rsi, 16
 
     add r12d, 4
@@ -228,6 +263,15 @@ xor r13,r13
 ;links utiles:
 
 ;https://cs.famaf.unc.edu.ar/~nicolasw/Docencia/CP/3-simdops.html#slide27
+
+
+
+
+
+; Te hacemos una consulta,
+
+
+
 
 
 
