@@ -57,16 +57,30 @@ xor r13,r13
     xor rdx, rdx
     xor ecx, ecx
 
-    ; rsi + r12d * 4 + r13d * width
-    lea edx, [r12d * 4]
-    mov eax, width
-    mul r12d                       ; rax <- width * r12d
-    add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
-    xor r11, r11
-    mov r11d, edx
+    ;calculamos rr , gg , bb (para 4 pixeles)
 
-    pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-    pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+
+    ;VERSION JUAN
+    ;rsi + r12d * 4 + r13d * width * 4
+    lea edx, [r13d * 4]
+    mov eax, width
+    mul edx                         ; eax <- width * r13d * 4
+    lea eax, [eax + r12d * 4]
+    xor r11, r11
+    mov r11d, eax
+
+
+    ;ANTERIOR
+    ; ;rsi + r12d * 4 + r13d * width
+    ; lea edx, [r12d * 4]
+    ; mov eax, width
+    ; mul r12d                       ; rax <- width * r12d
+    ; add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
+    ; xor r11, r11
+    ; mov r11d, edx
+
+    pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ aa_1 | rr_1 | gg_1 | bb_1 | aa_0 | rr_0 | gg_0 | bb_0 ]
+    pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
 
     ; Calculamos ii y jj
     mov eax, r12d
@@ -85,12 +99,22 @@ xor r13,r13
 
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
 
-    lea edx, [r14d * 4]            ; edx <-  ii * tamaño pixel
+    ;VERSION JUAN
+    lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
     mov rax, width
-    mul edx                        ; rax <- (ii * 4) * width
-    add eax, r15d                  ; rax <- rax + r15d
+    mul edx                        ; eax <- (jj * 4) * width
+    lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
+
+    ;ANTERIOR
+    ; lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
+    ; mov rax, width
+    ; mul edx                        ; rax <- (jj * 4) * width
+    ; add eax, r14d                  ; rax <- rax + r14d
+    ; xor r11, r11
+    ; mov r11d, eax
+
 
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + d_pixel_size]     ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
@@ -165,12 +189,12 @@ xor r13,r13
     cvtps2dq xmm11, xmm11 ; convierto float a int_32
     cvtps2dq xmm12, xmm12 ; convierto float a int_32
 
-    ; hasta aca esta todo hiper mega lindo oki hermoso beatiful primaveral salvajajemente bueno, maxi se la come
+
 
     packssdw xmm9, xmm10
     packssdw xmm11, xmm12
 
-    packuswb xmm9, xmm11
+    packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
     movq [rsi], xmm9
     add rsi, 16
@@ -239,6 +263,15 @@ xor r13,r13
 ;links utiles:
 
 ;https://cs.famaf.unc.edu.ar/~nicolasw/Docencia/CP/3-simdops.html#slide27
+
+
+
+
+
+; Te hacemos una consulta,
+
+
+
 
 
 
