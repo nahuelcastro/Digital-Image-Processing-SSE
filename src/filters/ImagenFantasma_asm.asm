@@ -196,10 +196,10 @@ xor r13,r13
 
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
-    movq [rsi], xmm9
-    add rsi, 8 ; 16 tiene logica
+    movups [rsi], xmm9 ;movaps [rsi], xmm9
+    add rsi, 16 ; 16 tiene logica
 
-    add r12d, 2 ; 4 tiene logica
+    add r12d, 4 ; 4 tiene logica
     cmp dword r12d, width
     jl .cicloWidth
 
