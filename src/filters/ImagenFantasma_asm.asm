@@ -17,7 +17,7 @@ unofin: times 1 dd 1.0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
 
 
-.text:
+.text:   
 
 ImagenFantasma_asm:
 ;RDI -> *src
@@ -59,8 +59,6 @@ xor r13,r13
 
     ;calculamos rr , gg , bb (para 4 pixeles)
 
-
-    ;VERSION JUAN
     ;rsi + r12d * 4 + r13d * width * 4
     lea edx, [r13d * 4]
     mov eax, width
@@ -68,16 +66,6 @@ xor r13,r13
     lea eax, [eax + r12d * 4]
     xor r11, r11
     mov r11d, eax
-
-
-    ;ANTERIOR
-    ; ;rsi + r12d * 4 + r13d * width
-    ; lea edx, [r12d * 4]
-    ; mov eax, width
-    ; mul r12d                       ; rax <- width * r12d
-    ; add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
-    ; xor r11, r11
-    ; mov r11d, edx
 
     pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ aa_1 | rr_1 | gg_1 | bb_1 | aa_0 | rr_0 | gg_0 | bb_0 ]
     pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
@@ -87,33 +75,25 @@ xor r13,r13
     xor r11d, r11d
     mov r11d, 0x2
     cdq
-    div r11d           ;devuelve en rax     ;;; fafv
+    div r11d           ;devuelve en rax  
     add eax, offsetX
-    mov r14d, eax   ;ii
+    mov r14d, eax   ;ii ancho offset
+  
 
     mov eax, r13d
     cdq
     div r11d
     add eax, offsetY
-    mov r15d, eax ;jj
+    mov r15d, eax ;jj alto offset
 
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
 
-    ;VERSION JUAN
-    lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
+    lea edx,[ r15d * 4]            ; edx <-  jj * tamaño pixel
     mov rax, width
     mul edx                        ; eax <- (jj * 4) * width
     lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
-
-    ;ANTERIOR
-    ; lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
-    ; mov rax, width
-    ; mul edx                        ; rax <- (jj * 4) * width
-    ; add eax, r14d                  ; rax <- rax + r14d
-    ; xor r11, r11
-    ; mov r11d, eax
 
 
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -184,7 +164,7 @@ xor r13,r13
     psrldq xmm8, 4          ; xmm8 :  [    0     |      b3       |       b3      |      b3       ]
     addps xmm12, xmm8       ; xmm12 : [  aa + b3  |   rr*0.9 + b3 |   gg*0.9 + b3 |   bb*0.9 + b3 ] px4
 
-    cvtps2dq xmm9, xmm9 ; convierto float a int_32
+    cvtps2dq xmm9, xmm9   ; convierto float a int_32
     cvtps2dq xmm10, xmm10 ; convierto float a int_32
     cvtps2dq xmm11, xmm11 ; convierto float a int_32
     cvtps2dq xmm12, xmm12 ; convierto float a int_32
@@ -197,9 +177,9 @@ xor r13,r13
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
     movups [rsi], xmm9 ;movaps [rsi], xmm9
-    add rsi, 16 ; 16 tiene logica
+    add rsi, 16
 
-    add r12d, 4 ; 4 tiene logica
+    add r12d, 4
     cmp dword r12d, width
     jl .cicloWidth
 
