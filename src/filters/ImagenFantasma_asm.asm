@@ -2,7 +2,7 @@ extern ImagenFantasma_c
 global ImagenFantasma_asm
 
 %define pixel_size 4
-%define d_pixel_size 8
+%define d_pixel_size 4
 
 .rodata:
 
@@ -17,7 +17,14 @@ unofin: times 1 dd 1.0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
 
 
-.text:   
+
+;falopeada:
+_255:  dd 100.0, 100.0, 100.0, 100.0
+;_09:  dd 0.0, 0.0, 0.0 , 1.0
+
+
+
+.text:
 
 ImagenFantasma_asm:
 ;RDI -> *src
@@ -44,8 +51,8 @@ push r15  ; jj
 %define offsetX [rbp + 16]
 %define offsetY [rbp + 24]
 
-%define width [rsp + 8]
-%define height [rsp + 16]
+%define width [rbp - 8]
+%define height [rbp - 16]
 
 mov width, edx
 mov height, ecx
@@ -75,10 +82,11 @@ xor r13,r13
     xor r11d, r11d
     mov r11d, 0x2
     cdq
-    div r11d           ;devuelve en rax  
+    div r11d           ;devuelve en rax
     add eax, offsetX
     mov r14d, eax   ;ii ancho offset
-  
+    ; ii(ancho) r14, jj(alto) 15
+
 
     mov eax, r13d
     cdq
@@ -89,12 +97,11 @@ xor r13,r13
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
 
     lea edx,[ r15d * 4]            ; edx <-  jj * tamaño pixel
-    mov rax, width
+    mov eax, width
     mul edx                        ; eax <- (jj * 4) * width
     lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
-
 
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + d_pixel_size]     ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
@@ -106,6 +113,8 @@ xor r13,r13
     pxor xmm12, xmm12
     pblendw xmm12, xmm2, 0x22     ; xmm12 : [   0  |   0  |    gg   |   0    |   0    |    0     |    gg   |   0   ]
     paddw xmm2, xmm12           ; xmm2 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
+
+    
 
     pxor xmm4, xmm4
     pblendw xmm3, xmm4, 0x88      ; xmm2 :  [   0  |   rg |   gg  |   bg   |   0    |    rg    |   gg   |   bg   ]
@@ -124,7 +133,13 @@ xor r13,r13
     pmovzxwd xmm7, xmm2 ; xmm7 : [      B3       |       B2      |      B1    |      B0    ]
     cvtdq2ps xmm7, xmm7 ; convierto int_32 a float
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
-    ;cvtps2dq xmm7, xmm7 ; convierto float a int_32
+    
+    
+  ;  ; FALOPEADA
+
+    shufps xmm7, xmm7, 0xA0     ; SHUFPSSSSSSS VER 
+
+  ;  ; FIN FALOPEADA
 
     pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
     psrldq xmm0, 8
@@ -145,6 +160,7 @@ xor r13,r13
     shufps xmm8, xmm8, 0h  ; xmm8 :  [    b0      |      b0       |       b0      |      b0       ]
     psrldq xmm8, 4         ; xmm8 :  [    0       |      b0       |       b0      |      b0       ]
     addps xmm9, xmm8       ; xmm9  : [  aa + b0   |   rr*0.9 + b0 |   gg*0.9 + b0 |   bb*0.9 + b0 ] px1
+
 
     mulps xmm10, xmm6      ; xmm10 : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px2
     movdqu xmm8, xmm7      ; copia xmm7
@@ -175,6 +191,7 @@ xor r13,r13
     packssdw xmm11, xmm12
 
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
+
 
     movups [rsi], xmm9 ;movaps [rsi], xmm9
     add rsi, 16
