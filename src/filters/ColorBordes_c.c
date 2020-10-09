@@ -22,7 +22,7 @@ void ColorBordes_c(
 
             int r=0;
             int g=0;
-            int b=0;
+            int b=0;    
 
 	        for (int jj = j-1; jj <= j+1; jj++) {
                 r += abs( src_matrix[jj][i-1].r - src_matrix[jj][i+1].r );

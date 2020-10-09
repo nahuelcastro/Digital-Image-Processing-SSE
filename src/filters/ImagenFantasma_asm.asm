@@ -4,7 +4,7 @@ global ImagenFantasma_asm
 %define pixel_size 4
 %define d_pixel_size 4
 
-.rodata:
+section .rodata:
 
 ;unob    : times 12 db 255.0
 _09:  dd 0.9, 0.9, 0.9,1.0
@@ -24,7 +24,7 @@ _255:  dd 100.0, 100.0, 100.0, 100.0
 
 
 
-.text:
+section .text
 
 ImagenFantasma_asm:
 ;RDI -> *src
@@ -41,7 +41,7 @@ ImagenFantasma_asm:
 ;armo stackFrame
 push rbp
 mov rbp, rsp
-sub rsp, 40
+sub rsp, 24
 push r11
 push r12  ;contador Height
 push r13  ;contador width
@@ -204,7 +204,7 @@ xor r13,r13
   cmp dword r13d, height
   jl .cicloHeight
 
-    add rsp, 40
+    add rsp, 24
     pop r15
     pop r14
     pop r13
