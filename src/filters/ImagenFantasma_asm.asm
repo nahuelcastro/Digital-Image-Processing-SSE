@@ -16,6 +16,11 @@ unofin: times 1 dd 1.0
 ;mask_filter_a: db 1,1,1,0,1,1,1,0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
 
+;falopeada:
+_255:  dd 100.0, 100.0, 100.0, 100.0
+;_09:  dd 0.0, 0.0, 0.0 , 1.0
+
+
 
 .text:
 
@@ -44,8 +49,8 @@ push r15  ; jj
 %define offsetX [rbp + 16]
 %define offsetY [rbp + 24]
 
-%define width [rsp + 8]
-%define height [rsp + 16]
+%define width [rbp - 8]
+%define height [rbp - 16]
 
 mov width, edx
 mov height, ecx
@@ -59,8 +64,6 @@ xor r13,r13
 
     ;calculamos rr , gg , bb (para 4 pixeles)
 
-
-    ;VERSION JUAN
     ;rsi + r12d * 4 + r13d * width * 4
     lea edx, [r13d * 4]
     mov eax, width
@@ -68,16 +71,6 @@ xor r13,r13
     lea eax, [eax + r12d * 4]
     xor r11, r11
     mov r11d, eax
-
-
-    ;ANTERIOR
-    ; ;rsi + r12d * 4 + r13d * width
-    ; lea edx, [r12d * 4]
-    ; mov eax, width
-    ; mul r12d                       ; rax <- width * r12d
-    ; add edx, eax                   ; edx <- [r12d * 4 + width * r12d]
-    ; xor r11, r11
-    ; mov r11d, edx
 
     pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ aa_1 | rr_1 | gg_1 | bb_1 | aa_0 | rr_0 | gg_0 | bb_0 ]
     pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
@@ -87,34 +80,26 @@ xor r13,r13
     xor r11d, r11d
     mov r11d, 0x2
     cdq
-    div r11d           ;devuelve en rax     ;;; fafv
+    div r11d           ;devuelve en rax
     add eax, offsetX
-    mov r14d, eax   ;ii
+    mov r14d, eax   ;ii ancho offset
+    ; ii(ancho) r14, jj(alto) 15
+
 
     mov eax, r13d
     cdq
     div r11d
     add eax, offsetY
-    mov r15d, eax ;jj
+    mov r15d, eax ;jj alto offset
 
     ; Guardamos en xmm3 y xmm4 los pixel para ghosting ponele rey (?
 
-    ;VERSION JUAN
-    lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
-    mov rax, width
+    lea edx,[ r15d * 4]            ; edx <-  jj * tamaño pixel
+    mov eax, width
     mul edx                        ; eax <- (jj * 4) * width
     lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
-
-    ;ANTERIOR
-    ; lea edx, [r15d * 4]            ; edx <-  jj * tamaño pixel
-    ; mov rax, width
-    ; mul edx                        ; rax <- (jj * 4) * width
-    ; add eax, r14d                  ; rax <- rax + r14d
-    ; xor r11, r11
-    ; mov r11d, eax
-
 
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + d_pixel_size]     ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
@@ -146,6 +131,12 @@ xor r13,r13
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
     ;cvtps2dq xmm7, xmm7 ; convierto float a int_32
 
+
+  ;  ; FALOPEADA
+  ;  movdqu xmm14, [_255]
+  ;  addps xmm7, xmm14   ; le sumo a todo 255 para ver que onda
+  ;  ; FIN FALOPEADA
+
     pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
     psrldq xmm0, 8
     pmovzxwd xmm10, xmm0   ; xmm10 : [aa_ext | rr_ext | gg_ext | bb_ext ] (2do px)
@@ -166,6 +157,7 @@ xor r13,r13
     psrldq xmm8, 4         ; xmm8 :  [    0       |      b0       |       b0      |      b0       ]
     addps xmm9, xmm8       ; xmm9  : [  aa + b0   |   rr*0.9 + b0 |   gg*0.9 + b0 |   bb*0.9 + b0 ] px1
 
+
     mulps xmm10, xmm6      ; xmm10 : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px2
     movdqu xmm8, xmm7      ; copia xmm7
     shufps xmm8, xmm8, 55h  ; xmm8 : [    b1      |      b1       |       b1      |      b1       ]
@@ -184,7 +176,7 @@ xor r13,r13
     psrldq xmm8, 4          ; xmm8 :  [    0     |      b3       |       b3      |      b3       ]
     addps xmm12, xmm8       ; xmm12 : [  aa + b3  |   rr*0.9 + b3 |   gg*0.9 + b3 |   bb*0.9 + b3 ] px4
 
-    cvtps2dq xmm9, xmm9 ; convierto float a int_32
+    cvtps2dq xmm9, xmm9   ; convierto float a int_32
     cvtps2dq xmm10, xmm10 ; convierto float a int_32
     cvtps2dq xmm11, xmm11 ; convierto float a int_32
     cvtps2dq xmm12, xmm12 ; convierto float a int_32
@@ -196,10 +188,14 @@ xor r13,r13
 
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
-    movq [rsi], xmm9
-    add rsi, 8 ; 16 tiene logica
+    ;FALOPEADAS
+     ;psrldq xmm9, 8
+    ;FIN FALOPEADAS
 
-    add r12d, 2 ; 4 tiene logica
+    movups [rsi], xmm9 ;movaps [rsi], xmm9
+    add rsi, 16
+
+    add r12d, 4
     cmp dword r12d, width
     jl .cicloWidth
 
