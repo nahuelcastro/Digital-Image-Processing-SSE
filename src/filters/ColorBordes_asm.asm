@@ -33,8 +33,8 @@ ColorBordes_asm:
 %define width [rbp - 8]
 %define height [rbp - 16]
 
-%define width_8 [rbp - 24]
-%define desp_2 [rbp - 32]
+%define width_ [rbp - 24]
+%define height_ [rbp - 32]
 
 ;armo stackFrame
 push rbp
@@ -48,15 +48,16 @@ push r15  ; jj
 
 mov width, edx
 mov height, ecx
-mov eax, 8
-mul edx
-mov width_8, eax
+dec ecx
+dec edx
+mov width_, edx
+mov height_, ecx
 xor rdx, rdx
 xor rcx, rcx
 
-
 xor r13,r13
 inc r13d
+
 .cicloHeight:
 
     xor r12, r12
@@ -86,19 +87,28 @@ inc r13d
         mov r15d, r13d
         sub r15d, 1    ; arranco con jj = j - 1
 
+        ; Xq?
         mov ebx, r13d
         inc ebx
-        
+        lea eax, [ebx * 4]
+        mul dword width  
+        mov ebx, eax
+        ...[b][a][a]
+
+        ; posicion actual en memoria (rdi en el que estoy)
+        ; j=1->  valor = abs(([actual] - (4*width)-32) - ([actual] - (4*width)+32))  -> valor += abs(([acutal]-32)-([actual]+32)) -> valor += abs(([acutal]+(4*width)-32)-([actual]+(4*width)+32)) -> dst.r = valor
+        ; j=1 ->  valor = abs(([actual] - (4*width)-32) - ([actual] - (4*width)+32))  -> valor+= abs(([acutal]-32)-([actual]+32)) -> valor += abs(([acutal]+(4*width)-32)-([actual]+(4*width)+32)) -> dst.g = valor
+        ; j=1 ->  valor = abs(([actual] - (4*width)-32) - ([actual] - (4*width)+32))  -> valor+= abs(([acutal]-32)-([actual]+32)) -> valor += abs(([acutal]+(4*width)-32)-([actual]+(4*width)+32)) -> dst.b = valor
         
         .ciclojj:
             mov edx, r12d   ; paso i a un auxiliar 
             ;4* (jj * width + (i-1))
             dec edx 
             mov eax, r15d
-            mul dword width               ; eax <- width * jj
+            mul dword width         ; eax <- width * jj
             add eax, edx            ; eax <- (width * jj) + (i-1)
-            lea r11d, [eax * 4]   ; desp_1 <- 4* (width * jj + (i-1))
-            ; lea desp, [eax * 4]   ; desp_1 <- 4* (width * jj + (i-1))
+            lea r11d, [eax * 4]     ; r11d <- 4* (width * jj + (i-1))
+            
 
 
             ;;segundo elemento
@@ -109,10 +119,10 @@ inc r13d
             ;lea desp_2, [eax * 4]   ; desp_1 <- 4* (width * jj) + (i+1)
 
             ; psubw
-            pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            pmovzxbw xmm2, [rdi + r11]            ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+            pmovzxbw xmm3, [rdi + r11 + 8]        ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
-            pmovzxbw xmm4, [rdi + r11 + 16]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+            pmovzxbw xmm4, [rdi + r11 + 16]       ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             ;pmovzxbw xmm5, [rdi + desp + 24]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             psubw xmm2, xmm3    ; restamos
@@ -123,46 +133,43 @@ inc r13d
 
             paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
             paddw xmm1, xmm3
-            
 
-        inc r15d                                 ; inc r15d 
-        cmp dword r15d, ebx
-        jle .ciclojj
+            mov eax, 4
+            mul dword width
+            add r15d, eax      ;inc r15d                                   
+            cmp dword r15d, ebx
+            jle .ciclojj
 
 
 
-        mov r15d, r12d
-        dec r15d    ; arranco con ii = i - 1
+        mov r14d, r12d
+        dec r14d    ; arranco con ii = i - 1
 
+        xor ebx, ebx
         mov ebx, r12d  ; ebx <- i + 1 (para el cmp de cicloii)
         inc ebx
 
 
         .cicloii:
-            ; mov edx, r13d   ; paso j a un auxiliar 
+            
             ; 4*( (j-1) * width + ii) y ; 4*( (j+1) * width + ii) //  REVISAR QUE CREO QUE ME CONFUNDI ENTRE j e i            ; dec edx 
-            mov eax, r13d
+            mov eax, r13d           ; auxiliar de j
             dec eax
-            mul dword width               ; eax <- width * (j-1)
-            add eax, r15d            ; eax <- (width * (j-1)) + (ii)
-            lea r11d, [eax * 4]   ; desp_1 <- 4* (width * jj + (i-1))
-            ; lea desp, [eax * 4]   ; desp_1 <- 4* (width * jj + (i-1))
-
-            ;;segundo elemento
-            ;add edx, 2
-            ;mov eax, r15d
-            ;mul width               ; eax <- width * jj
-            ;add eax, edx            ; eax <- (width * jj) + (i+1)
-            ;lea desp_2, [eax * 4]   ; desp_1 <- 4* (width * jj) + (i+1)
-
-            ; psubw
+            mul dword width         ; eax <- width * (j-1)
+            add eax, r14d           ; eax <- (width * (j-1)) + (ii)
+            lea r11d, [eax * 4]     ; r11d <- 4* (width * jj + (i-1))
+            
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             ; r11 = r11 + ( 2*width ) * 4
+            mov eax, 8
+            mul dword width
+            add r11d, eax
+
              
-            pmovzxbw xmm3, [rdi + r11 + 16]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm5, [rdi + r11 + 24]     ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            pmovzxbw xmm3, [rdi + r11 ]        ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+            pmovzxbw xmm5, [rdi + r11 + 8]     ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             ;;; para NAJU estos 3 de abajo van, pero en algo la rompo, pero para mi es asi 
             ;add r11d, width_8
@@ -178,14 +185,14 @@ inc r13d
             paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
             paddw xmm1, xmm4
 
-        inc r15d
-        cmp dword r15d, ebx
+        add r14d, 4
+        cmp dword r14d, ebx
         jle .cicloii
 
         ; hardcodeo la A
         movdqu xmm6, [mask_levantar_a]
         paddw xmm0, xmm6            ; todas las a + 255
-        paddw xmm1, xmm6
+        paddw xmm1, xmm6           
 
         ; IMPORTANTE tengo que ver si toma como pre que vienen con signo o sin signo
         ; y no se si viene sin signo o signo
@@ -193,13 +200,13 @@ inc r13d
 
         movups [rsi], xmm0 ;movaps [rsi], xmm9
         add rsi, 16
-
+        
         add r12d, 4
-        cmp dword r12d, width
+        cmp dword r12d, width_
         jl .cicloWidth
 
     inc r13d
-    cmp dword r13d, height
+    cmp dword r13d, height_
     jl .cicloHeight
 
 

@@ -13,7 +13,7 @@ void ImagenFantasma_c(
     int src_row_size,
     int dst_row_size,
     int offsetx,
-    int offsety)   
+    int offsety)
 {
     bgra_t (*src_matrix)[(src_row_size+3)/4] = (bgra_t (*)[(src_row_size+3)/4]) src;
     bgra_t (*dst_matrix)[(dst_row_size+3)/4] = (bgra_t (*)[(dst_row_size+3)/4]) dst;
@@ -33,7 +33,6 @@ void ImagenFantasma_c(
             float bbb = (float)src_matrix[jj][ii].b;
 
             float b = (rrr + 2 * ggg + bbb)/4;
-
 
             dst_matrix[j][i].r = SAT( rr * 0.9 + b/2 );
             dst_matrix[j][i].g = SAT( gg * 0.9 + b/2 );
