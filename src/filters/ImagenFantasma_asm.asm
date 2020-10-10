@@ -6,22 +6,13 @@ global ImagenFantasma_asm
 
 section .rodata:
 
-;unob    : times 12 db 255.0
 _09:  dd 0.9, 0.9, 0.9,1.0
 uno:  times 16 db 1.0
-;mascara : dq 0x0000000100000000
 ocho:   times 4 dd 8.0
 unofin: times 1 dd 1.0
 ;mask: dw 1,2,1,0,1,2,1,0
 ;mask_filter_a: db 1,1,1,0,1,1,1,0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
-
-
-
-;falopeada:
-_255:  dd 100.0, 100.0, 100.0, 100.0
-;_09:  dd 0.0, 0.0, 0.0 , 1.0
-
 
 
 section .text
@@ -33,8 +24,8 @@ ImagenFantasma_asm:
 ;ECX -> height
 ;R8D  -> src_row_size
 ;R9D  -> dst_row_size
-;RBP + 16 -> offsetX    ;20 ver como acceder a la parte baja
-;RBP + 24 -> offsety    ;28 ver
+;RBP + 16 -> offsetX    
+;RBP + 24 -> offsety    
 
 
 
