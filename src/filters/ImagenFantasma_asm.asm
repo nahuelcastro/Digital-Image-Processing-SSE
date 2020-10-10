@@ -2,14 +2,12 @@ extern ImagenFantasma_c
 global ImagenFantasma_asm
 
 %define pixel_size 4
-%define d_pixel_size 8
+%define d_pixel_size 4
 
-.rodata:
+section .rodata:
 
-;unob    : times 12 db 255.0
 _09:  dd 0.9, 0.9, 0.9,1.0
 uno:  times 16 db 1.0
-;mascara : dq 0x0000000100000000
 ocho:   times 4 dd 8.0
 unofin: times 1 dd 1.0
 ;mask: dw 1,2,1,0,1,2,1,0
@@ -22,7 +20,7 @@ _255:  dd 100.0, 100.0, 100.0, 100.0
 
 
 
-.text:
+section .text
 
 ImagenFantasma_asm:
 ;RDI -> *src
@@ -31,15 +29,15 @@ ImagenFantasma_asm:
 ;ECX -> height
 ;R8D  -> src_row_size
 ;R9D  -> dst_row_size
-;RBP + 16 -> offsetX    ;20 ver como acceder a la parte baja
-;RBP + 24 -> offsety    ;28 ver
+;RBP + 16 -> offsetX
+;RBP + 24 -> offsety
 
 
 
 ;armo stackFrame
 push rbp
 mov rbp, rsp
-sub rsp, 40
+sub rsp, 24
 push r11
 push r12  ;contador Height
 push r13  ;contador width
@@ -112,6 +110,8 @@ xor r13,r13
     pblendw xmm12, xmm2, 0x22     ; xmm12 : [   0  |   0  |    gg   |   0    |   0    |    0     |    gg   |   0   ]
     paddw xmm2, xmm12           ; xmm2 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
 
+
+
     pxor xmm4, xmm4
     pblendw xmm3, xmm4, 0x88      ; xmm2 :  [   0  |   rg |   gg  |   bg   |   0    |    rg    |   gg   |   bg   ]
     pxor xmm12, xmm12
@@ -129,7 +129,13 @@ xor r13,r13
     pmovzxwd xmm7, xmm2 ; xmm7 : [      B3       |       B2      |      B1    |      B0    ]
     cvtdq2ps xmm7, xmm7 ; convierto int_32 a float
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
-    ;cvtps2dq xmm7, xmm7 ; convierto float a int_32
+
+
+  ;  ; FALOPEADA
+
+    shufps xmm7, xmm7, 0xA0     ; SHUFPSSSSSSS VER
+
+  ;  ; FIN FALOPEADA
 
 
   ;  ; FALOPEADA
@@ -188,9 +194,6 @@ xor r13,r13
 
     packuswb xmm9, xmm11   ; parece que empaqueta con signo
 
-    ;FALOPEADAS
-     ;psrldq xmm9, 8
-    ;FIN FALOPEADAS
 
     movups [rsi], xmm9 ;movaps [rsi], xmm9
     add rsi, 16
@@ -203,7 +206,7 @@ xor r13,r13
   cmp dword r13d, height
   jl .cicloHeight
 
-    add rsp, 40
+    add rsp, 24
     pop r15
     pop r14
     pop r13
