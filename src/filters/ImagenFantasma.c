@@ -34,7 +34,7 @@ void aplicar_ImagenFantasma(configuracion_t *config)
     if( offsety < 0 ) offsety = 0;
     if( offsetx > info.width ) offsetx = info.width/2;
     if( offsety > info.height ) offsety = info.height/2;
-    ImagenFantasma(info.bytes, config->dst.bytes, info.width, info.height,
+    ImagenFantasma(info.bytes, config->dst.bytes, info.width, info.height, 
               info.row_size, config->dst.row_size, offsetx, offsety);
 }
 
@@ -50,3 +50,5 @@ void ayuda_ImagenFantasma()
 }
 
 DEFINIR_FILTRO(ImagenFantasma,1)
+
+

@@ -44,3 +44,4 @@ void ColorBordes_c(
     }
     utils_paintBorders32(dst, width, height, src_row_size, 1, 0xFFFFFFFF);
 }
+

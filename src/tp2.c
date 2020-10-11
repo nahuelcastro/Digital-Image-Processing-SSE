@@ -23,7 +23,7 @@ filtro_t filtros[4];
 
 int main( int argc, char** argv ) {
 
-    filtros[0] = ColorBordes;
+    filtros[0] = ColorBordes; 
     filtros[1] = ImagenFantasma;
     filtros[2] = PixeladoDiferencial;
     filtros[3] = ReforzarBrillo;
@@ -34,9 +34,7 @@ int main( int argc, char** argv ) {
     config.bits_dst = 32;
 
     procesar_opciones(argc, argv, &config);
-
     
-
     // Imprimo info
     if (!config.nombre) {
         printf ( "Procesando...\n");
