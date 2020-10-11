@@ -8,10 +8,16 @@ section .rodata
 
 
 mask_levantar_a:  dw 0, 0, 0, 255, 0, 0, 0, 255
+<<<<<<< HEAD
 ;blanco: db 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
 ;blanco: db 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
 blanco: times 16 db 0xff
 mask: db 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+=======
+blanco: times 16 db 0xff
+mask_vertical_izq: db 255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0
+mask_vertical_der: db 0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,255
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 section .text
 
 
@@ -42,23 +48,46 @@ push r13  ;contador Height j
 push r14  ; ii
 push r15  ; jj
 
+<<<<<<< HEAD
 mov rsi_original, rsi
 mov tope, r8d
 mov eax, tope
+=======
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 mov width, edx
 mov height, ecx
 sub edx, 4
 sub ecx, 1
 mov width_dec  , edx
 mov height_dec , ecx
+<<<<<<< HEAD
+=======
+
+
+; este tope es chino, pero anda, despues si podes emprolijalo mazi
+mov rsi_original, rsi
+mov eax, r8d
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 xor r11,r11
 mov r11d, 0x4
 cdq
 div r11d
 mov tope, eax
+<<<<<<< HEAD
+=======
+
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 xor rdx, rdx
 xor rcx, rcx
 
+; acomoda el rsi para escribir la imagen
+
+xor r13, r13
+mov eax, 4
+mul dword width
+add eax, 4
+mov r13d, eax 
+add rsi, r13
 
 xor r13,r13
 inc r13d
@@ -87,16 +116,26 @@ inc r13d
 
 
         .ciclojj:
+<<<<<<< HEAD
             mov r14d, r12d           ; paso i a un auxiliar
             ;4* (jj * width + (i-1))
             dec r14d
+=======
+            mov r14d, r12d           ; paso i a un auxiliar 
+            ;4* (jj * width + (i-1))
+            dec r14d 
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
             xor eax, eax
             mov eax, r15d
             mul dword width         ; eax <- width * jj
             add eax, r14d            ; eax <- (width * jj) + (i-1)
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (i-1))
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
             ; tiene que dar 10256 y da 10240
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
@@ -116,7 +155,11 @@ inc r13d
             jle .ciclojj
 
         xor r14, r14
+<<<<<<< HEAD
         mov r14d, r12d
+=======
+        mov r14d, r12d  
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
         dec r14d        ; arranco con ii = i - 1
         mov ebx, r12d   ; ebx <- i + 1 (para el cmp de cicloii)
         inc ebx
@@ -140,7 +183,11 @@ inc r13d
             ; r11 = r11 + ( 2*width ) * 4
 
             mov eax, 8; 8
+<<<<<<< HEAD
             mul dword width
+=======
+            mul dword width            
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
             add r11d, eax
 
             pmovzxbw xmm3, [rdi + r11 ]         ; xmm3 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -173,7 +220,11 @@ inc r13d
         add rsi, 16
 
         add r12d, 4 ; con 8 anda 1/4 * 2
+<<<<<<< HEAD
         cmp dword r12d, tope
+=======
+        cmp dword r12d, width
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
         jl .cicloWidth
 
     inc r13d
@@ -182,7 +233,11 @@ inc r13d
 
 
 
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 whiteBorder:
     ; rdi_original + width*4
     ; rdi_original + width*4 - 4
@@ -191,14 +246,21 @@ whiteBorder:
     xor r15, r15 ; aux
     pxor xmm1, xmm1
     movdqu xmm1, [blanco]
+<<<<<<< HEAD
     movdqu xmm0, [mask]
+=======
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 
     .horizontal:
         movups [rsi], xmm1
         movups [rsi + 16 ], xmm1
 
         add rsi, 32
+<<<<<<< HEAD
         add r12d, 8 ; porque hago de a 8 px
+=======
+        add r12d, 8 ; porque hago de a 8 px 
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 
         cmp dword r12d, width_dec
         jl .horizontal
@@ -208,14 +270,22 @@ whiteBorder:
         cmp r15d, 1
         je .vertical
 
+<<<<<<< HEAD
         inc r15d
         ; rsi = ( width * (height - 1) )* 4
         xor rax, rax
         add rax, height
+=======
+        inc r15d 
+        ; rsi =  rsi + ( width * (height - 1) )* 4   
+        xor rax, rax
+        add rax, height 
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
         dec rax
         mul dword width
         lea rax, [rax * 4]
         add rsi, rax
+<<<<<<< HEAD
         jmp .horizontal
 
     .vertical:
@@ -223,6 +293,32 @@ whiteBorder:
         pmovzxbw xmm2, [rsi]
         pblendvb xmm2, xmm1, xmm0
         movups [rsi], xmm2
+=======
+        jmp .horizontal 
+
+    .vertical:
+        pxor xmm0, xmm0
+        pxor xmm2, xmm2
+        
+        movdqu xmm0, [rsi]
+        movdqu xmm2, [mask_vertical_izq]
+        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        movdqu [rsi], xmm0
+
+        xor r13, r13
+        mov eax, 4
+        mul dword width
+        sub eax, 4
+        mov r13d, eax 
+
+        pxor xmm0, xmm0
+
+        movdqu xmm0, [rsi + r13]
+        movdqu xmm2, [mask_vertical_izq]
+        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        movdqu [rsi + r13], xmm0
+         
+>>>>>>> df76efce47813cfc8e5a58fca555180fe22be920
 
         xor rax, rax
         mov rax, 4
