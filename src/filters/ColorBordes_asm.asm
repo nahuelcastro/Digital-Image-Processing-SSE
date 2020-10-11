@@ -8,10 +8,9 @@ section .rodata
 
 
 mask_levantar_a:  dw 0, 0, 0, 255, 0, 0, 0, 255
-;blanco: db 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
-;blanco: db 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
 blanco: times 16 db 0xff
-mask: db 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+mask_vertical_izq: db 255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0
+mask_vertical_der: db 0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,255
 section .text
 
 
@@ -42,23 +41,34 @@ push r13  ;contador Height j
 push r14  ; ii
 push r15  ; jj
 
-mov rsi_original, rsi
-mov tope, r8d
-mov eax, tope
 mov width, edx
 mov height, ecx
 sub edx, 4         
 sub ecx, 1 
 mov width_dec  , edx
 mov height_dec , ecx
+
+
+; este tope es chino, pero anda, despues si podes emprolijalo mazi
+mov rsi_original, rsi
+mov eax, r8d
 xor r11,r11
 mov r11d, 0x4
 cdq
 div r11d
 mov tope, eax
+
 xor rdx, rdx
 xor rcx, rcx
 
+; acomoda el rsi para escribir la imagen
+
+xor r13, r13
+mov eax, 4
+mul dword width
+add eax, 4
+mov r13d, eax 
+add rsi, r13
 
 xor r13,r13
 inc r13d
@@ -173,7 +183,7 @@ inc r13d
         add rsi, 16
 
         add r12d, 4 ; con 8 anda 1/4 * 2
-        cmp dword r12d, tope
+        cmp dword r12d, width
         jl .cicloWidth
 
     inc r13d 
@@ -191,7 +201,6 @@ whiteBorder:
     xor r15, r15 ; aux
     pxor xmm1, xmm1
     movdqu xmm1, [blanco]
-    movdqu xmm0, [mask]
 
     .horizontal:
         movups [rsi], xmm1
@@ -209,23 +218,38 @@ whiteBorder:
         je .vertical
 
         inc r15d 
-        ; rsi = ( width * (height - 1) )* 4   
+        ; rsi =  rsi + ( width * (height - 1) )* 4   
         xor rax, rax
-        add rax, height
+        add rax, height 
         dec rax
         mul dword width
         lea rax, [rax * 4]
         add rsi, rax
-        jmp .horizontal
+        jmp .horizontal 
 
     .vertical:
+        pxor xmm0, xmm0
         pxor xmm2, xmm2
         
-        ;ESTO ESTÁ PESIMO. Cambiar mañana
-        ; pmovzxbw xmm2, [rsi]
-        ; pblendvb xmm2, xmm1, xmm0 
-        ; movups [rsi], xmm2
-       
+        movdqu xmm0, [rsi]
+        movdqu xmm2, [mask_vertical_izq]
+        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        movdqu [rsi], xmm0
+
+        xor r13, r13
+        mov eax, 4
+        mul dword width
+        sub eax, 4
+        mov r13d, eax 
+
+        pxor xmm0, xmm0
+
+        movdqu xmm0, [rsi + r13]
+        movdqu xmm2, [mask_vertical_izq]
+        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        movdqu [rsi + r13], xmm0
+         
+
         xor rax, rax
         mov rax, 4
         mul dword width
