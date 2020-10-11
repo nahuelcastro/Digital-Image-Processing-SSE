@@ -12,6 +12,11 @@ ocho:   times 4 dd 8.0
 unofin: times 1 dd 1.0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
 
+;falopeada:
+_255:  dd 100.0, 100.0, 100.0, 100.0
+;_09:  dd 0.0, 0.0, 0.0 , 1.0
+
+
 
 section .text
 
@@ -22,9 +27,8 @@ ImagenFantasma_asm:
 ;ECX      -> height
 ;R8D      -> src_row_size
 ;R9D      -> dst_row_size
-;RBP + 16 -> offsetX    
-;RBP + 24 -> offsety    
-
+;RBP + 16 -> offsetX
+;RBP + 24 -> offsety
 
 
 ;armo stackFrame
@@ -103,7 +107,7 @@ xor r13,r13
     pblendw xmm12, xmm2, 0x22     ; xmm12 : [   0  |   0  |    gg   |   0    |   0    |    0     |    gg   |   0   ]
     paddw xmm2, xmm12           ; xmm2 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
 
-    
+
 
     pxor xmm4, xmm4
     pblendw xmm3, xmm4, 0x88      ; xmm2 :  [   0  |   rg |   gg  |   bg   |   0    |    rg    |   gg   |   bg   ]
@@ -122,9 +126,8 @@ xor r13,r13
     pmovzxwd xmm7, xmm2 ; xmm7 : [      B3       |       B2      |      B1    |      B0    ]
     cvtdq2ps xmm7, xmm7 ; convierto int_32 a float
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
-    
-    
-    shufps xmm7, xmm7, 0xA0     
+
+    shufps xmm7, xmm7, 0xA0
 
     pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
     psrldq xmm0, 8
@@ -207,7 +210,3 @@ xor r13,r13
 ;links utiles:
 
 ;https://cs.famaf.unc.edu.ar/~nicolasw/Docencia/CP/3-simdops.html#slide27
-
-
-
-
