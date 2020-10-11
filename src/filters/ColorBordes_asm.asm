@@ -8,8 +8,10 @@ section .rodata
 
 
 mask_levantar_a:  dw 0, 0, 0, 255, 0, 0, 0, 255
-
-
+;blanco: db 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+;blanco: db 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
+blanco: times 16 db 0xff
+mask: db 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
 section .text
 
 
@@ -27,27 +29,33 @@ ColorBordes_asm:
 %define width_8 [rbp - 24]
 %define width_dec [rbp - 32]
 %define height_dec [rbp - 40]
+%define tope [rbp - 48]
+%define rsi_original [rbp - 56]
 
 ;armo stackFrame
 push rbp
 mov rbp, rsp
-sub rsp, 40
+sub rsp, 56
 push r11
 push r12  ;contador width i
 push r13  ;contador Height j
 push r14  ; ii
 push r15  ; jj
 
-
+mov rsi_original, rsi
+mov tope, r8d
+mov eax, tope
 mov width, edx
 mov height, ecx
 sub edx, 4         
 sub ecx, 1 
 mov width_dec  , edx
 mov height_dec , ecx
-mov eax, 8
-mul edx
-mov width_8, eax
+xor r11,r11
+mov r11d, 0x4
+cdq
+div r11d
+mov tope, eax
 xor rdx, rdx
 xor rcx, rcx
 
@@ -79,17 +87,17 @@ inc r13d
         
         
         .ciclojj:
-            mov edx, r12d           ; paso i a un auxiliar 
+            mov r14d, r12d           ; paso i a un auxiliar 
             ;4* (jj * width + (i-1))
-            dec edx 
+            dec r14d 
             xor eax, eax
             mov eax, r15d
             mul dword width         ; eax <- width * jj
-            add eax, edx            ; eax <- (width * jj) + (i-1)
+            add eax, r14d            ; eax <- (width * jj) + (i-1)
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (i-1))
             
-
+            ; tiene que dar 10256 y da 10240
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
             pmovzxbw xmm4, [rdi + r11 + 16]    ; xmm4 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -107,7 +115,7 @@ inc r13d
             cmp dword r15d, ebx
             jle .ciclojj
 
-
+        xor r14, r14
         mov r14d, r12d  
         dec r14d        ; arranco con ii = i - 1
         mov ebx, r12d   ; ebx <- i + 1 (para el cmp de cicloii)
@@ -126,12 +134,16 @@ inc r13d
         
 
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm4 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             ;;; para NAJU estos 3 de abajo van, pero en algo la rompo, pero para mi es asi 
             ; r11 = r11 + ( 2*width ) * 4
-            add r11d, width_8
-            pmovzxbw xmm3, [rdi + r11 ]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+
+            mov eax, 8; 8
+            mul dword width            
+            add r11d, eax
+
+            pmovzxbw xmm3, [rdi + r11 ]         ; xmm3 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm5, [rdi + r11 + 8]      ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             psubw xmm2, xmm3    
@@ -160,8 +172,8 @@ inc r13d
         movups [rsi], xmm0 ;movaps [rsi], xmm0
         add rsi, 16
 
-        add r12d, 4
-        cmp dword r12d, width_dec
+        add r12d, 4 ; con 8 anda 1/4 * 2
+        cmp dword r12d, tope
         jl .cicloWidth
 
     inc r13d 
@@ -170,11 +182,66 @@ inc r13d
 
 
 
+    
+whiteBorder:
+    ; rdi_original + width*4
+    ; rdi_original + width*4 - 4
+    mov rsi, rsi_original
+    xor r12,r12
+    xor r15, r15 ; aux
+    pxor xmm1, xmm1
+    movdqu xmm1, [blanco]
+    movdqu xmm0, [mask]
+
+    .horizontal:
+        movups [rsi], xmm1
+        movups [rsi + 16 ], xmm1
+
+        add rsi, 32
+        add r12d, 8 ; porque hago de a 8 px 
+
+        cmp dword r12d, width_dec
+        jl .horizontal
+
+        xor r12, r12
+        mov rsi, rsi_original
+        cmp r15d, 1
+        je .vertical
+
+        inc r15d 
+        ; rsi = ( width * (height - 1) )* 4   
+        xor rax, rax
+        add rax, height
+        dec rax
+        mul dword width
+        lea rax, [rax * 4]
+        add rsi, rax
+        jmp .horizontal
+
+    .vertical:
+        pxor xmm2, xmm2
+        
+        ;ESTO ESTÁ PESIMO. Cambiar mañana
+        ; pmovzxbw xmm2, [rsi]
+        ; pblendvb xmm2, xmm1, xmm0 
+        ; movups [rsi], xmm2
+       
+        xor rax, rax
+        mov rax, 4
+        mul dword width
+        add rsi, rax
+
+        inc r12d
+        cmp dword r12d, height_dec
+        jl .vertical
+
+
+
 pop r15
 pop r14
 pop r13
 pop r12
 pop r11
-add rsp, 40
+add rsp, 56
 pop rbp
 ret
