@@ -10,8 +10,6 @@ _09:  dd 0.9, 0.9, 0.9,1.0
 uno:  times 16 db 1.0
 ocho:   times 4 dd 8.0
 unofin: times 1 dd 1.0
-;mask: dw 1,2,1,0,1,2,1,0
-;mask_filter_a: db 1,1,1,0,1,1,1,0
 mask_filter_a: db 0xff,0xff,0xff,0x00,0xff,0xff,0xff,0x00
 
 ;falopeada:
@@ -23,15 +21,14 @@ _255:  dd 100.0, 100.0, 100.0, 100.0
 section .text
 
 ImagenFantasma_asm:
-;RDI -> *src
-;RSI -> *dst
-;EDX -> width
-;ECX -> height
-;R8D  -> src_row_size
-;R9D  -> dst_row_size
+;RDI      -> *src
+;RSI      -> *dst
+;EDX      -> width
+;ECX      -> height
+;R8D      -> src_row_size
+;R9D      -> dst_row_size
 ;RBP + 16 -> offsetX
 ;RBP + 24 -> offsety
-
 
 
 ;armo stackFrame
@@ -130,18 +127,7 @@ xor r13,r13
     cvtdq2ps xmm7, xmm7 ; convierto int_32 a float
     divps xmm7, xmm6    ; xmm7 : [     B3/8      |      B2/8     |     B1/8   |     B0/8   ]
 
-
-  ;  ; FALOPEADA
-
-    shufps xmm7, xmm7, 0xA0     ; SHUFPSSSSSSS VER
-
-  ;  ; FIN FALOPEADA
-
-
-  ;  ; FALOPEADA
-  ;  movdqu xmm14, [_255]
-  ;  addps xmm7, xmm14   ; le sumo a todo 255 para ver que onda
-  ;  ; FIN FALOPEADA
+    shufps xmm7, xmm7, 0xA0
 
     pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
     psrldq xmm0, 8
@@ -188,7 +174,6 @@ xor r13,r13
     cvtps2dq xmm12, xmm12 ; convierto float a int_32
 
 
-
     packssdw xmm9, xmm10
     packssdw xmm11, xmm12
 
@@ -221,57 +206,7 @@ xor r13,r13
 
 ;b ImagenFantasma_asm.cicloWidth if $r12 == 0x4fe
 
-;
-    ; mov [rsp+32], 0000
-    ; movd [rsp+36], 00000000h
-    ; movss [rsp+40], 3f800000h ; 1.0
-    ; movd [rsp+44], 00000000h
-    ; movss xmm6, [rsp+32]
-;
-
-
-
-
-; POR FAVOR VOLAR ESTO A LA RE GOMA CUANDO TERMINEMOS :D
-; xorps xmm8, xmm8
-; movdqu xmm8, [uno]       ;xmm8 : [   1   |    1   |    1   |    1   |    1   |    1    |    1    |    1    ]
-; psrldq xmm8, 4           ;xmm8 : [  0  |   1    |    1   |    1    ]
-; andps xmm0, xmm8         ;xmm0 : [  0  |rr * 0.9|gg * 0.9|bb * 0.9 ]
-; andnps xmm9, xmm8        ;xmm9 : [ aa  |    0   |    0   |    0    ]
-; orps xmm0, xmm9          ;xmm0 : [ aa  |rr * 0.9|gg * 0.9|bb * 0.9 ]
-; andps xmm1, xmm8         ;xmm1 : [  0  |rr * 0.9|gg * 0.9|bb * 0.9 ]
-; andnps xmm10, xmm8       ;xmm10: [ aa  |    0   |    0   |    0    ]
-; orps xmm1, xmm10         ;xmm1 : [ aa  |rr * 0.9|gg * 0.9|bb * 0.9 ]
-
-; COMO NO SE NOS OCURRIÓ, HICIMOS CABEZEADAS
-; cabezeada1: times 4 dd [xmm3 + 96]
-; ;cabezeada1: times 16 dd [xmm3 + 96]
-; movdqu xmm6, [cabezeada1]
-; movd  [xmm6 + 0], 0                   ; ver si xmm6 va con corchetes
-; addps xmm0, xmm6
-; cabezeada2: times 4 dd [xmm3 + 64]
-; ;cabezeada2: times 16 dd [xmm3 + 64]
-; movdqu xmm6, [cabezeada2]
-; movd  [xmm6 + 0], 0                   ; ver si xmm6 va con corchetes
-; addps xmm1, xmm6
-
-
-
-
 
 ;links utiles:
 
 ;https://cs.famaf.unc.edu.ar/~nicolasw/Docencia/CP/3-simdops.html#slide27
-
-
-
-
-
-; Te hacemos una consulta,
-
-
-
-
-
-
-;
