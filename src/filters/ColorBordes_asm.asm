@@ -9,10 +9,10 @@ section .rodata
 
 mask_levantar_a:  dw 0, 0, 0, 255, 0, 0, 0, 255
 blanco: times 16 db 0xff
-mask_vertical_izq: db 255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0
-mask_vertical_der: db 0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,255
-section .text
+mask_vertical: db 255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0
 
+
+section .text
 
 ColorBordes_asm:
 
@@ -232,7 +232,7 @@ whiteBorder:
         pxor xmm2, xmm2
         
         movdqu xmm0, [rsi]
-        movdqu xmm2, [mask_vertical_izq]
+        movdqu xmm2, [mask_vertical]
         paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
         movdqu [rsi], xmm0
 
@@ -245,7 +245,7 @@ whiteBorder:
         pxor xmm0, xmm0
 
         movdqu xmm0, [rsi + r13]
-        movdqu xmm2, [mask_vertical_izq]
+        movdqu xmm2, [mask_vertical]
         paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
         movdqu [rsi + r13], xmm0
          
