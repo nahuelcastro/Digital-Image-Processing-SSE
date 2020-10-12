@@ -5,8 +5,16 @@ global ReforzarBrillo_asm
 section .rodata
 
 cuatro:   times 4 dd 4.0
-maskBSup: times 16 db brilloSup 
-maskBInf: times 16 db brilloInf
+; maskBSup: times 16 db brilloSup 
+; maskBInf: times 16 db brilloInf
+
+mask_levantar_a: db 0,0,0,255,0,0,0,255,0,0,0,255,0,0,0,255
+
+;mask_blend: db 0,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0
+mask_blend: db 0,0,0,255,0,0,0,0,0,0,0,0,0,0,0,0
+
+regMayor: times 16 db 50
+regMenor: times 16 db 50
 
 
 section .text
@@ -36,8 +44,8 @@ push r15
 
 %define umbralSup [rbp + 16]
 %define umbralInf [rbp + 24]
-%define brilloSup [rbp + 30]
-%define brilloInf [rbp + 38]
+%define brilloSup [rbp + 32]
+%define brilloInf [rbp + 40]
 
 %define width [rbp - 8]
 %define height [rbp - 16]
@@ -48,8 +56,20 @@ mov height, ecx
 xor rdx, rdx
 xor rcx,rcx
 
+; regMayor: times 16 db brilloSup
+; regMenor: times 16 db brilloInf
 
-
+; Ponemos en todos los bytes de xmm11 y xmm2 el entero brilloSup y brilloInf respectivamente 
+pxor xmm11, xmm11
+pxor xmm12, xmm12
+movss xmm11, brilloSup    
+movss xmm12, brilloInf 
+pshufd xmm11, xmm11, 0x00
+pshufd xmm12, xmm12, 0x00 
+packssdw xmm11, xmm11     
+packuswb xmm11, xmm11     
+packssdw xmm12, xmm12
+packuswb xmm12, xmm12
 
 xor r13,r13
 .cicloHeight:           ; i
@@ -58,15 +78,15 @@ xor r13,r13
     .cicloWidth:        ; j
 
 
-    lea edx,[r15d * 4]            ; edx <-  jj * tamaño pixel
+    lea edx,[r13d * 4]            ; edx <-  jj * tamaño pixel
     mov eax, width
     mul edx                        ; eax <- (jj * 4) * width
-    lea eax, [eax + r14d * 4]      ; eax <- eax + r14d * 4
+    lea eax, [eax + r12d * 4]      ; eax <- eax + r14d * 4
     xor r11, r11
     mov r11d, eax
 
-    pmovzxbw xmm2, [rdi + r11]           ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-    pmovzxbw xmm3, [rdi + r11 + 8]       ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+    pmovzxbw xmm2, [rdi + r11]           ; xmm2 :  [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+    pmovzxbw xmm3, [rdi + r11 + 8]       ; xmm3 :  [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
 
   ;creamos B
@@ -96,95 +116,61 @@ xor r13,r13
     pmovzxwd xmm4, xmm2         ; xmm4 : [      B3       |       B2      |      B1    |      B0    ]
     cvtdq2ps xmm4, xmm4         ; convierto int_32 a float
     divps xmm4, xmm6            ; xmm4 : [     B3/4      |      B2/4     |     B1/4   |     B0/4   ]
+    roundps xmm4, xmm4, 3 ; Redondeo a 0
     cvtps2dq xmm4, xmm4 ; convierto float a int_32
     
 
-  ;reforzarBrillo:
     pxor xmm2, xmm2
     pxor xmm3, xmm3
-    pxor xmm5, xmm5
-    pxor xmm6, xmm6
-    pmovzxbw xmm2, [rdi + r11]       ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-    pmovzxbw xmm3, [rdi + r11 + 8]   ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
-    pmovzxwd xmm6, xmm2              ; xmm6 : [    a_0    |     r_0   |     g_0   |    b_0    ]
-    psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm2
-    pmovzxwd xmm2, xmm2              ; xmm2 : [    a_1    |     r_1   |     g_1   |    b_1    ]
-    pmovzxwd xmm5, xmm3              ; xmm5 : [    a_2    |     r_2   |     g_2   |    b_2    ] 
-    psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm3
-    pmovzxwd xmm3, xmm3              ; xmm3 : [    a_3    |     r_3   |     g_3   |    b_3    ] 
-
-     xor xmm9,  xmm9    ;suma
-     xor xmm10, xmm10   ;resta
+    pmovzxbw xmm2, [rdi + r11]           ; xmm2 :  [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+    pmovzxbw xmm3, [rdi + r11 + 8]       ; xmm3 :  [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+    
+    
+    pxor xmm9,  xmm9    ;suma
+    pxor xmm10, xmm10   ;resta
   
-    regMayor: times 16 db brilloSup
-    regMenor: times 16 db brilloInf
-    mask_blend: db 0,0,0,0,0,0,0,0,0,0,0,0,128,0,0,0
-
-    movdqu xmm11, [regMayor]
-    movdqu xmm12, [regMenor]  
-
-    mov xmm0, [mask_blend]
+    movdqu xmm0, [mask_blend]
     xor r14, r14
-    loop:
 
+    packuswb xmm2, xmm3
+
+    .loop_:             ; armamos super mega mascara
+      cmp r14d, 4
+      je .fin1
       inc r14d
       cmp dword r14d, 1
       je .inicio
       pslldq xmm0, 4
 
-      .inicio
+      .inicio:
       extractps r15d, xmm4, 0x00   ; Colocamos en r15 el b_i que corresponde 
-      psrldq xmm4, 4
+      psrldq xmm4, 4                  
+    
+      cmp dword r15d, umbralSup
+      jg .mayor
+       
+      cmp dword r15d, umbralInf
+      jl .menor
       
-      cmp r15d, umbralSup
-      je loop
-      jl menor
-      blendvps xmm9, xmm11, xmm0
-      jmp loop
+      jmp .loop_
+    
+      .mayor:
+      blendvps xmm9, xmm11, xmm0    ; mayor  219,220
+      jmp .loop_
 
-      menor:
+      .menor:
       blendvps xmm10, xmm12, xmm0
-      jmp loop
+      jmp .loop_
 
+.fin1:
 
+    paddusb xmm2, xmm9
+    psubusb xmm2, xmm10 
 
-    add xmm2, xmm9
-
-    sub xmm2, xmm10 
-
-    mov rsi, xmm2 
- 
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.verSegundo
-    pinsrd xmm9, rx, imm8 00 00 00 01
-
-    pinsrd xmm9, rx, imm8 00 00 00 10
-
-    pinsrd xmm9, rx, imm8 00 00 00 11
-
-
-    255,255,255,255
-
-
+    movdqu xmm13, [mask_levantar_a]
+    paddusb xmm2, xmm13 ; levantamos la a , 
+  
+    movups [rsi], xmm2
     add rsi, 16
 
     add r12d, 4
@@ -256,3 +242,19 @@ ret
 ;     ; psubsb xmm9, xmm10
 ;     ; jmp .finComparacion
 
+
+
+
+;   ;reforzarBrillo:
+;     pxor xmm2, xmm2
+;     pxor xmm3, xmm3
+;     pxor xmm5, xmm5
+;     pxor xmm6, xmm6
+;     pmovzxbw xmm2, [rdi + r11]       ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+;     pmovzxbw xmm3, [rdi + r11 + 8]   ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+;     pmovzxwd xmm6, xmm2              ; xmm6 : [    a_0    |     r_0   |     g_0   |    b_0    ]
+;     psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm2
+;     pmovzxwd xmm2, xmm2              ; xmm2 : [    a_1    |     r_1   |     g_1   |    b_1    ]
+;     pmovzxwd xmm5, xmm3              ; xmm5 : [    a_2    |     r_2   |     g_2   |    b_2    ] 
+;     psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm3
+;     pmovzxwd xmm3, xmm3              ; xmm3 : [    a_3    |     r_3   |     g_3   |    b_3    ] 

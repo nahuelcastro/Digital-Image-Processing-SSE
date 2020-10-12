@@ -106,7 +106,7 @@ inc r13d
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (i-1))
 
-            ; tiene que dar 10256 y da 10240
+
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
             pmovzxbw xmm4, [rdi + r11 + 16]    ; xmm4 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -132,7 +132,7 @@ inc r13d
 
         .cicloii:
             ; mov edx, r13d   ; paso j a un auxiliar
-            ; 4*( (j-1) * width + ii) y ; 4*( (j+1) * width + ii) //  REVISAR QUE CREO QUE ME CONFUNDI ENTRE j e i            ; dec edx
+            ; 4*( (j-1) * width + ii) y ; 4*( (j+1) * width + ii) //  REVISAR QUE CREO QUE ME CONFUNDI ENTRE j e i      
             xor eax, eax
             mov eax, r13d
             dec eax
@@ -188,8 +188,6 @@ inc r13d
     inc r13d
     cmp dword r13d, height_dec
     jl .cicloHeight
-
-
 
 
 whiteBorder:
