@@ -27,7 +27,7 @@ ColorBordes_asm:
 %define width_8 [rbp - 24]
 %define width_dec [rbp - 32]
 %define height_dec [rbp - 40]
-%define tope [rbp - 48]
+%define finFoto [rbp - 48]
 %define rsi_original [rbp - 56]
 
 ;armo stackFrame
@@ -42,25 +42,13 @@ push r15  ; jj
 
 mov width, edx
 mov height, ecx
-sub edx, 4
+sub edx, 1
 sub ecx, 1
 mov width_dec  , edx
 mov height_dec , ecx
 
 
-; este tope es chino, pero anda, despues si podes emprolijalo mazi
 mov rsi_original, rsi
-mov eax, r8d
-xor r11,r11
-mov r11d, 0x4
-cdq
-div r11d
-mov tope, eax
-
-xor rdx, rdx
-xor rcx, rcx
-
-; acomoda el rsi para escribir la imagen
 
 xor r13, r13
 mov eax, 4
@@ -106,19 +94,30 @@ inc r13d
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (i-1))
 
+            xor eax, eax
+            mov eax, height
+            mul dword width
+            lea eax, [eax * 4]
+            sub eax, 16
+            mov finFoto, eax 
 
-            pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
-            pmovzxbw xmm4, [rdi + r11 + 16]    ; xmm4 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+            cmp dword r11d, finFoto
+            jge .continuaCiclojj
+            pmovzxbw xmm4, [rdi + r11 + 16]    ; xmm4 : [ a_6 | r_6 | g_6 | b_6 | a_5 | r_5 | g_5 | b_5 ]
+            
+            .continuaCiclojj:
+            
+                pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+                pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
-            psubw xmm2, xmm3    ; restamos
-            psubw xmm3, xmm4
+                psubw xmm2, xmm3    ; restamos
+                psubw xmm3, xmm4
 
-            pabsw xmm2, xmm2    ;tomamos modulo
-            pabsw xmm3, xmm3
+                pabsw xmm2, xmm2    ;tomamos modulo
+                pabsw xmm3, xmm3
 
-            paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
-            paddw xmm1, xmm3
+                paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
+                paddw xmm1, xmm3
 
             inc r15d
             cmp dword r15d, ebx
@@ -140,29 +139,37 @@ inc r13d
             add eax, r14d           ; eax <- (width * (j-1)) + (ii)
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (ii))
-
-
+           
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm4 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
-
-            ;;; para NAJU estos 3 de abajo van, pero en algo la rompo, pero para mi es asi
-            ; r11 = r11 + ( 2*width ) * 4
 
             mov eax, 8; 8
             mul dword width
             add r11d, eax
 
-            pmovzxbw xmm3, [rdi + r11 ]         ; xmm3 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+            xor eax, eax
+            mov eax, height
+            mul dword width
+            lea eax, [eax * 4]
+            sub eax, 16
+            mov finFoto, eax 
+
+            cmp dword r11d, finFoto
+            jge .continuaCicloii
             pmovzxbw xmm5, [rdi + r11 + 8]      ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
-            psubw xmm2, xmm3
-            psubw xmm4, xmm5
+            .continuaCicloii:
+                pmovzxbw xmm3, [rdi + r11 ]         ; xmm3 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
 
-            pabsw xmm2, xmm2    ; tomamos modulo
-            pabsw xmm4, xmm4
 
-            paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
-            paddw xmm1, xmm4
+                psubw xmm2, xmm3
+                psubw xmm4, xmm5
+
+                pabsw xmm2, xmm2    ; tomamos modulo
+                pabsw xmm4, xmm4
+
+                paddw xmm0, xmm2    ; sumamos el r,g,b al acumulador de rgb, la a va a quedar con basura
+                paddw xmm1, xmm4
 
             inc r14d
             cmp dword r14d, ebx
@@ -179,10 +186,11 @@ inc r13d
         packuswb xmm0, xmm1
 
         movups [rsi], xmm0 ;movaps [rsi], xmm0
-        add rsi, 16
 
+        add rsi, 16
         add r12d, 4 ; con 8 anda 1/4 * 2
-        cmp dword r12d, width
+
+        cmp dword r12d, width_dec   
         jl .cicloWidth
 
     inc r13d
