@@ -41,13 +41,14 @@ push r15  ; jj
 
 mov width, edx
 mov height, ecx
+xor eax, eax
+mov eax, 8
+mul edx
+mov width_8, eax
 sub edx, 4         
 sub ecx, 1 
 mov width_dec  , edx
 mov height_dec , ecx
-mov eax, 8
-mul edx
-mov width_8, eax
 xor rdx, rdx
 xor rcx, rcx
 
