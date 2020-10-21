@@ -148,7 +148,7 @@ xor r13,r13
     
       cmp dword r15d, umbralSup
       jg .mayor
-       
+      
       cmp dword r15d, umbralInf
       jl .menor
       

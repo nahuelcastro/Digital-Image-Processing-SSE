@@ -59,7 +59,7 @@ for imp in asm; do
   done
   
   for s in ${SIZESMEM[*]}; do
-    run_test "$TP2ALU" "PixeladoDiferencial" "$imp" "$TESTINDIR/$img0.$s.bmp" "100 50 50 50"
+    run_test "$TP2ALU" "ReforzarBrillo" "$imp" "$TESTINDIR/$img0.$s.bmp" "100 50 50 50"
     if [ $ret -ne 0 ]; then exit -1; fi
   done
 
