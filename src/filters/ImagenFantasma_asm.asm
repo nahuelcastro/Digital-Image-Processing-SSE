@@ -31,9 +31,9 @@ ImagenFantasma_asm:
 push rbp
 mov rbp, rsp
 sub rsp, 24
-push r11
-push r12  ;contador Height
-push r13  ;contador width
+push r11  ; aux
+push r12  ; contador Height
+push r13  ; contador width
 push r14  ; ii
 push r15  ; jj
 
@@ -84,7 +84,7 @@ xor r13,r13
     xor r11d, r11d
     mov dword r11d, 0x2
     cdq
-    div r11d                    ;returnea en rax
+    div r11d                    ;returna en rax
     add eax, offsetX
     mov r14d, eax               ;ii ancho offset
     
@@ -114,56 +114,56 @@ xor r13,r13
     pand xmm13, xmm2                ; xmm13 : [   0  |   0  |    gg  |   0    |   0    |    0     |    gg   |   0   ]
     paddw xmm2, xmm13               ; xmm2 :  [   0  |   rg |   2gg  |   bg   |   0    |    rg    |   2gg   |   bg   ]
     pxor xmm3, xmm3
-    phaddsw xmm2, xmm3              ; xmm2 : [   0    |    0    |   0    |    0  |(0+r)_1 | (2g+b)_1 | (0+r)_0 | (b+2g)_0]
-    phaddsw xmm2, xmm3              ; xmm2 : [   0   |    0   |    0   |    0   |   0   |     0   |    B1   |   B0   ]
+    phaddsw xmm2, xmm3              ; xmm2 : [   0   |    0   |   0    |    0   |(0+r)_1 | (2g+b)_1 | (0+r)_0 | (b+2g)_0]
+    phaddsw xmm2, xmm3              ; xmm2 : [   0   |    0   |    0   |    0   |   0    |     0    |    B1   |   B0   ]
     
-    
-    ; estos bx no estan divididos por cuatro, lo hacemos despues directo por 8
-    movdqu xmm6, [ocho]
-    pmovzxwd xmm7, xmm2       ; xmm7 : [      0       |        0      |      B1    |      B0    ]
-    cvtdq2ps xmm7, xmm7       ; convierto int_32 a float
-    divps xmm7, xmm6          ; xmm7 : [      0       |        0      |     B1/8   |     B0/8   ]
-    shufps xmm7, xmm7, 0x50
+
+    ; estos b_i los dividimos por 8, ahorrando dividir primero por 4 y luego por dos
+    movdqu xmm6, [ocho]             ; xmm6 : [      8       |        8      |       8    |      8    ]
+    pmovzxwd xmm7, xmm2             ; xmm7 : [      0       |        0      |      B1    |      B0    ]
+    cvtdq2ps xmm7, xmm7             ; convierto int_32 a float
+    divps xmm7, xmm6                ; xmm7 : [      0       |        0      |     B1/8   |     B0/8   ]
+    shufps xmm7, xmm7, 0x50         ; xmm7 : [    B1/8      |      B1/8     |     B0/8   |     B0/8   ]
 
 
     movdqu xmm6, [_09]
-    mulps xmm9 , xmm6         ; xmm9  : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px1
-    movdqu xmm8, xmm7         ; copia xmm7
-    shufps xmm8, xmm8, 0h     ; xmm8 :  [    b0      |      b0       |       b0      |      b0       ]
-    psrldq xmm8, 4            ; xmm8 :  [    0       |      b0       |       b0      |      b0       ]
-    addps xmm9, xmm8          ; xmm9  : [    aa      |   rr*0.9 + b0 |   gg*0.9 + b0 |   bb*0.9 + b0 ] px1
+    mulps xmm9 , xmm6               ; xmm9  : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px1
+    movdqu xmm8, xmm7               ; copia xmm7
+    shufps xmm8, xmm8, 0h           ; xmm8 :  [    b0      |      b0       |       b0      |      b0       ]
+    psrldq xmm8, 4                  ; xmm8 :  [    0       |      b0       |       b0      |      b0       ]
+    addps xmm9, xmm8                ; xmm9 :  [    aa      |   rr*0.9 + b0 |   gg*0.9 + b0 |   bb*0.9 + b0 ] px2.
 
 
-    mulps xmm10, xmm6         ; xmm10 : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px2
-    movdqu xmm8, xmm7         ; copia xmm7
-    shufps xmm8, xmm8, 55h    ; xmm8 :  [    b1      |      b1       |       b1      |      b1       ]
-    psrldq xmm8, 4            ; xmm8 :  [    0       |      b1       |       b1      |      b1       ]
-    addps xmm10, xmm8         ; xmm10:  [    aa      |   rr*0.9 + b1 |   gg*0.9 + b1 |   bb*0.9 + b1 ] px2
+    mulps xmm10, xmm6               ; xmm10 : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px2
+    movdqu xmm8, xmm7               ; copia xmm7
+    shufps xmm8, xmm8, 55h          ; xmm8 :  [      b1      |      b1       |       b1      |      b1       ]
+    psrldq xmm8, 4                  ; xmm8 :  [    0       |      b1       |       b1      |      b1       ]
+    addps xmm10, xmm8               ; xmm10:  [    aa      |   rr*0.9 + b1 |   gg*0.9 + b1 |   bb*0.9 + b1 ] px2
 
-    mulps xmm11, xmm6         ; xmm11 : [  aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px3
-    movdqu xmm8, xmm7         ; copia xmm7
-    shufps xmm8, xmm8, 0xaa   ; xmm8 : [    b2      |      b2       |       b2      |      b2       ]
-    psrldq xmm8, 4            ; xmm8   : [     0      |      b2       |       b2      |      b2       ]
-    addps xmm11, xmm8         ; xmm11 : [    aa      |   rr*0.9 + b2 |   gg*0.9 + b2 |   bb*0.9 + b2 ] px3
+    mulps xmm11, xmm6               ; xmm11 : [ aa * 1.0   |   rr * 0.9    |   gg * 0.9    |   bb * 0.9    ] px3
+    movdqu xmm8, xmm7               ; copia xmm7
+    shufps xmm8, xmm8, 0xaa         ; xmm8  : [    b2      |      b2       |       b2      |      b2       ]
+    psrldq xmm8, 4                  ; xmm8  : [     0      |      b2       |       b2      |      b2       ]
+    addps xmm11, xmm8               ; xmm11 : [    aa      |   rr*0.9 + b2 |   gg*0.9 + b2 |   bb*0.9 + b2 ] px3
 
-    mulps xmm12, xmm6         ; xmm2  : [  aa * 1.0 |   rr * 0.9   |   gg * 0.9    |   bb * 0.9    ] px4
-    movdqu xmm8, xmm7         ; copia xmm7
-    shufps xmm8, xmm8, 0xff   ; xmm8 : [    b3    |      b3       |       b3      |      b3       ]
-    psrldq xmm8, 4            ; xmm8 :  [    0     |      b3       |       b3      |      b3       ]
-    addps xmm12, xmm8         ; xmm12 : [    aa    |   rr*0.9 + b3 |   gg*0.9 + b3 |   bb*0.9 + b3 ] px4
+    mulps xmm12, xmm6               ; xmm2  : [  aa * 1.0 |   rr * 0.9   |   gg * 0.9    |   bb * 0.9    ] px4
+    movdqu xmm8, xmm7               ; copia xmm7
+    shufps xmm8, xmm8, 0xff         ; xmm8 : [    b3    |      b3       |       b3      |      b3       ]
+    psrldq xmm8, 4                  ; xmm8 :  [    0     |      b3       |       b3      |      b3       ]
+    addps xmm12, xmm8               ; xmm12 : [    aa    |   rr*0.9 + b3 |   gg*0.9 + b3 |   bb*0.9 + b3 ] px4
 
-    cvtps2dq xmm9, xmm9       ; convierto float a int_32
-    cvtps2dq xmm10, xmm10     ; convierto float a int_32
-    cvtps2dq xmm11, xmm11     ; convierto float a int_32
-    cvtps2dq xmm12, xmm12     ; convierto float a int_32
+    cvtps2dq xmm9, xmm9             ; convierto float a int_32
+    cvtps2dq xmm10, xmm10           ; convierto float a int_32
+    cvtps2dq xmm11, xmm11           ; convierto float a int_32
+    cvtps2dq xmm12, xmm12           ; convierto float a int_32
 
     packssdw xmm9, xmm10
     packssdw xmm11, xmm12
 
-    packuswb xmm9, xmm11   ; parece que empaqueta con signo
+    packuswb xmm9, xmm11            
 
 
-    movups [rsi], xmm9 ;movaps [rsi], xmm9
+    movups [rsi], xmm9 
     add rsi, 16
 
     add r12d, 4
@@ -182,14 +182,3 @@ xor r13,r13
     pop r11
     pop rbp
     ret
-
-;gdb --args tp2 ImagenFantasma -i asm ../img/NottingHill.bmp 0 0
-
-;b ImagenFantasma_asm.cicloHeight if $r13 == 0x2cf
-
-;b ImagenFantasma_asm.cicloWidth if $r12 == 0x4fe
-
-
-;links utiles:
-
-;https://cs.famaf.unc.edu.ar/~nicolasw/Docencia/CP/3-simdops.html#slide27
