@@ -107,8 +107,11 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
             
             .continuaCiclojj:
             
-                pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-                pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+                movdqu xmm14, [rdi + r11]
+
+                pmovzxbw xmm2, xmm14         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+                psrldq xmm14, 8
+                pmovzxbw xmm3, xmm14     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
                 psubw xmm2, xmm3    ; restamos
                 psubw xmm3, xmm4
@@ -139,8 +142,13 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
             add eax, r14d                   ; eax <- (width * (j-1)) + (ii)
             xor r11, r11
             lea r11d, [eax * 4]             ; r11 <- 4* (width * jj + (ii))
-            pmovzxbw xmm2, [rdi + r11]      ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm4, [rdi + r11 + 8]  ; xmm4 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            
+            movdqu xmm14, [rdi + r11]
+            
+            pmovzxbw xmm2,xmm14
+            psrldq xmm14, 8
+            pmovzxbw xmm4,xmm14
+                            
 
             mov eax, 8; 8
             mul dword width
