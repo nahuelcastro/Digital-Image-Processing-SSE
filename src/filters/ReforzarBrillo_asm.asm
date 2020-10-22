@@ -77,7 +77,7 @@ xor r13,r13
     xor r12, r12
     .cicloWidth:        ; j
 
-
+    ;;;;xor r11, r11 ;;;;
     lea edx,[r13d * 4]            ; edx <-  jj * tamaño pixel
     mov eax, width
     mul edx                        ; eax <- (jj * 4) * width
@@ -122,6 +122,8 @@ xor r13,r13
 
     pxor xmm2, xmm2
     pxor xmm3, xmm3
+
+    ;;;;xor r11, r11
     pmovzxbw xmm2, [rdi + r11]           ; xmm2 :  [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + 8]       ; xmm3 :  [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
     
@@ -170,6 +172,8 @@ xor r13,r13
     movdqu xmm13, [mask_levantar_a]
     paddusb xmm2, xmm13 ; levantamos la a , 
   
+    ;;;add rdi, 16
+
     movups [rsi], xmm2
     add rsi, 16
 
