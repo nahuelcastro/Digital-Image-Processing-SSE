@@ -41,6 +41,17 @@ function run_test {
     ret=0; return;
 }
 
+# rm rgb2yuv.csv
+# echo "Algoritmo,Tamaño,Ticks" > rgb2yuv.csv
+# rm yuv2rgb.csv
+# echo "Algoritmo,Tamaño,Ticks" > yuv2rgb.csv
+# rm fourCombine.csv
+# echo "Algoritmo,Tamaño,Ticks" > fourCombine.csv
+# rm linearZoom.csv
+# echo "Algoritmo,Tamaño,Ticks" > linearZoom.csv
+# rm maxCloser.csv
+# echo "Algoritmo,Tamaño,Ticks" > maxCloser.csv
+
 for imp in asm; do
 
   for s in ${SIZESMEM[*]}; do

@@ -1,3 +1,9 @@
 {
-    "cSpell.language": ",es"
+    "cSpell.language": ",es",
+    "files.associations": {
+        "*.tcc": "c",
+        "memory_resource": "c",
+        "fstream": "c",
+        "memory": "c"
+    }
 }

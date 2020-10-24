@@ -54,6 +54,8 @@ typedef struct configuracion_t {
     char *carpeta_salida;
     char *extra_archivo_salida;
 
+    int widthh;
+
     int bits_src;
     int bits_dst;
     bool es_video;
@@ -84,8 +86,8 @@ typedef struct filtro_t {
 
 // ~~~ declaraciones de tp2 ~~~
 filtro_t* detectar_filtro(configuracion_t *config);
-void      correr_filtro_imagen(configuracion_t *config, aplicador_fn_t aplicador);
-void      imprimir_tiempos_ejecucion(unsigned long long int start, unsigned long long int end, int cant_iteraciones);
+void correr_filtro_imagen(configuracion_t *config, aplicador_fn_t aplicador, int argc, char **argv);
+void imprimir_tiempos_ejecucion(unsigned long long int start, unsigned long long int end, int cant_iteraciones, int argc, char **argv, long int bmp_size_px, configuracion_t *config);
 
 // ~~~ declaraciones de cli.h ~~~
 void      procesar_opciones(int argc, char **argv, configuracion_t *config);

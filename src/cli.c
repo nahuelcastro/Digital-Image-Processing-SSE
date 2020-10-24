@@ -44,6 +44,7 @@ void procesar_opciones(int argc, char **argv, configuracion_t *config) {
     config->carpeta_salida = ".";
     config->extra_archivo_salida = "";
 
+
     // extraemos opciones de la linea de comandos
     const char* const op_cortas = "hi:vt:fo:wn";
 
