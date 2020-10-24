@@ -20,6 +20,17 @@ void ReforzarBrillo_c(
     bgra_t (*src_matrix)[(src_row_size+3)/4] = (bgra_t (*)[(src_row_size+3)/4]) src;
     bgra_t (*dst_matrix)[(dst_row_size+3)/4] = (bgra_t (*)[(dst_row_size+3)/4]) dst;
 
+// BORRAR
+//int uSup = 160;
+//int uInf = 60;
+//int bSup = 50;
+//int bInf = 50;
+/*
+int uSup = 60;
+int uInf = 10;
+int bSup = 50;
+int bInf = 50;
+*/
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {

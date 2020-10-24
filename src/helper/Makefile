@@ -2,7 +2,7 @@
 #   Organizacion del Computador II - Trabajo Practico 2                     #
 # ************************************************************************* #
 
-CFLAGS64 = -ggdb -Wall -Wno-unused-parameter -Wextra -std=c99 -no-pie -pedantic -m64 -O3 -march=native
+CFLAGS64 = -ggdb -Wall -Wno-unused-parameter -Wextra -std=c99 -no-pie -pedantic -m64 -O0 -march=native
 CFLAGS=$(CFLAGS64)
 
 BUILD_DIR = ../build

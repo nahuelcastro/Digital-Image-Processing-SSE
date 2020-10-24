@@ -238,8 +238,7 @@ void bmp_delete(BMP* img) {
 
 /* ************************************************************************* */
 uint32_t bmp_width(BMP* img) {
-  //printf("%d",((BMPIH *)(img->ih))->biWidth);
-   return (((BMPIH *)(img->ih))->biWidth);
+  return (((BMPIH*)(img->ih))->biWidth);
 }
 
 /* ************************************************************************* */

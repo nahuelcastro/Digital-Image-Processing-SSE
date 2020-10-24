@@ -99,14 +99,14 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
             mul dword width
             lea eax, [eax * 4]
             sub eax, 16
-            mov finFoto, eax
+            mov finFoto, eax 
 
             cmp dword r11d, finFoto
             jge .continuaCiclojj
             pmovzxbw xmm4, [rdi + r11 + 16]         ; xmm4 : [ a_6 | r_6 | g_6 | b_6 | a_5 | r_5 | g_5 | b_5 ]
-
+            
             .continuaCiclojj:
-
+            
                 movdqu xmm14, [rdi + r11]
 
                 pmovzxbw xmm2, xmm14         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -134,7 +134,7 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
 
         .cicloii:
             ; mov edx, r13d   ; paso j a un auxiliar
-            ; 4*( (j-1) * width + ii) y ; 4*( (j+1) * width + ii) //  REVISAR QUE CREO QUE ME CONFUNDI ENTRE j e i
+            ; 4*( (j-1) * width + ii) y ; 4*( (j+1) * width + ii) //  REVISAR QUE CREO QUE ME CONFUNDI ENTRE j e i      
             xor eax, eax
             mov eax, r13d
             dec eax
@@ -142,13 +142,13 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
             add eax, r14d                   ; eax <- (width * (j-1)) + (ii)
             xor r11, r11
             lea r11d, [eax * 4]             ; r11 <- 4* (width * jj + (ii))
-
+            
             movdqu xmm14, [rdi + r11]
-
+            
             pmovzxbw xmm2,xmm14
             psrldq xmm14, 8
             pmovzxbw xmm4,xmm14
-
+                            
 
             mov eax, 8; 8
             mul dword width
@@ -159,7 +159,7 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
             mul dword width
             lea eax, [eax * 4]
             sub eax, 16
-            mov finFoto, eax
+            mov finFoto, eax 
 
             cmp dword r11d, finFoto
             jge .continuaCicloii
@@ -194,7 +194,7 @@ inc r13d                    ; aumentamos j para no acceder a memoria invalida
         add rsi, 16
         add r12d, 4         ; con 8 anda 1/4 * 2
 
-        cmp dword r12d, width_dec
+        cmp dword r12d, width_dec   
         jl .cicloWidth
 
     inc r13d

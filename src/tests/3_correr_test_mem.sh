@@ -41,17 +41,6 @@ function run_test {
     ret=0; return;
 }
 
-# rm rgb2yuv.csv
-# echo "Algoritmo,Tamaño,Ticks" > rgb2yuv.csv
-# rm yuv2rgb.csv
-# echo "Algoritmo,Tamaño,Ticks" > yuv2rgb.csv
-# rm fourCombine.csv
-# echo "Algoritmo,Tamaño,Ticks" > fourCombine.csv
-# rm linearZoom.csv
-# echo "Algoritmo,Tamaño,Ticks" > linearZoom.csv
-# rm maxCloser.csv
-# echo "Algoritmo,Tamaño,Ticks" > maxCloser.csv
-
 for imp in asm; do
 
   for s in ${SIZESMEM[*]}; do
@@ -65,12 +54,12 @@ for imp in asm; do
   done
 
   for s in ${SIZESMEM[*]}; do
-    run_test "$TP2ALU" "PixeladoDiferencial" "$imp" "$TESTINDIR/$img0.$s.bmp" "50"
+    run_test "$TP2ALU" "ReforzarBrillo" "$imp" "$TESTINDIR/$img0.$s.bmp" "50"
     if [ $ret -ne 0 ]; then exit -1; fi
   done
   
   for s in ${SIZESMEM[*]}; do
-    run_test "$TP2ALU" "ReforzarBrillo" "$imp" "$TESTINDIR/$img0.$s.bmp" "100 50 50 50"
+    run_test "$TP2ALU" "PixeladoDiferencial" "$imp" "$TESTINDIR/$img0.$s.bmp" "100 50 50 50"
     if [ $ret -ne 0 ]; then exit -1; fi
   done
 
