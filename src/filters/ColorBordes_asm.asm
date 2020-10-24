@@ -139,7 +139,6 @@ inc r13d
             add eax, r14d           ; eax <- (width * (j-1)) + (ii)
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (ii))
-
             pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
             pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm4 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 

@@ -61,7 +61,7 @@ xor r13,r13
 
     ;rsi + r12d * 4 + r13d * width * 4
     lea edx, [r13d * 4]
-    mov eax, width
+    mov dword eax, width
     mul edx                         ; eax <- width * r13d * 4
     lea eax, [eax + r12d * 4]
     xor r11, r11
@@ -71,11 +71,11 @@ xor r13,r13
     pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
 
     ; Calculamos ii y jj
-    mov eax, r12d
+    mov dword eax, r12d
     xor r11d, r11d
-    mov r11d, 0x2
+    mov dword r11d, 0x2
     cdq
-    div r11d           ;devuelve en rax
+    div r11d                          ;return in rax
     add eax, offsetX
     mov r14d, eax   ;ii ancho offset
     ; ii(ancho) r14, jj(alto) 15
