@@ -21,6 +21,8 @@ filtro_t filtros[4];
 
 // ~~~ fin de seteo de filtros ~~~
 
+void newCorrerFiltro(configuracion_t *config, aplicador_fn_t aplicador, int cant);
+
 int main( int argc, char** argv ) {
 
     filtros[0] = ColorBordes; 
@@ -52,9 +54,13 @@ int main( int argc, char** argv ) {
         return 0;
     }
 
+
     filtro_t *filtro = detectar_filtro(&config);
 
     filtro->leer_params(&config, argc, argv);
+    int corridas = 150;
+    //newCorrerFiltro(&config, filtro->aplicador, corridas);
+    
     correr_filtro_imagen(&config, filtro->aplicador);
     filtro->liberar(&config);
 
@@ -103,3 +109,73 @@ void correr_filtro_imagen(configuracion_t *config, aplicador_fn_t aplicador) {
     imagenes_liberar(config);
     imprimir_tiempos_ejecucion(start, end, config->cant_iteraciones);
 }
+
+void creadorCsv(unsigned long long int start, unsigned long long int end, int cant_iteraciones, FILE* file, configuracion_t *config, void* type) {
+    
+    unsigned long long int cant_ciclos = end-start;
+    int time = end-start;
+    fprintf(file, "%s,%s,%d,%d,%lli\n", config->nombre_filtro, type, config->src.width*config->src.height, time, cant_ciclos);
+}
+
+void newCorrerFiltro(configuracion_t *config, aplicador_fn_t aplicador, int cant) {
+    void* type;
+    if(config->tipo_filtro==0){
+        type= "C";
+    }else{
+        type="ASM";
+    }
+    // Reemplazar si quiero distinto
+    // if(config->tipo_filtro==1){
+    //     type="ASM";
+    // }else{
+    //     char path[100];
+    //     char str1[100] = "/home/maximo/Desktop/Facu/facu/Orga2/TP2/TP2-Orga-2/src/build\0";
+    //     char str2[100] = "/home/maximo/Desktop/Facu/facu/Orga2/TP2/TP2-Orga-2/src/build2\0";
+    //     char str3[100] = "/home/maximo/Desktop/Facu/facu/Orga2/TP2/TP2-Orga-2/src/build3\0";
+    //     getcwd(path,100);
+    //     printf("%s",path);
+    //     if(strchr(path,48)){
+    //         type="C0";
+    //     }else if (strchr(path,51)){
+    //         type="C3";
+    //     }else{
+    //         type="C2";
+    //     }
+    // }
+    // printf(type);
+
+    imagenes_abrir(config);
+    void* nombre = config->nombre_filtro;
+    char filtro[30];
+    strcpy(filtro, nombre);
+    strcat(filtro, ".csv");
+    //char path[100] = "../";
+    //strcat(path, filtro);
+    FILE* file = fopen(filtro, "a");
+    printf("A new correr llegó \n");
+    
+    unsigned long long start, end;
+
+    //fprintf(file, "Filtro,Implementacion,Tamaño,Ciclos,Tiempo\n"); Agregarselo manualmente, sino se imprime con cada tamaño
+    imagenes_guardar(config);
+    for (int i = 0; i < cant; i++)
+    {
+        imagenes_flipVertical(&config->src, src_img);
+        imagenes_flipVertical(&config->dst, dst_img);
+        if(config->archivo_entrada_2 != 0) {
+            imagenes_flipVertical(&config->src_2, src_img2);
+        }
+        MEDIR_TIEMPO_START(start)
+        for (int i = 0; i < config->cant_iteraciones; i++) {
+                aplicador(config);
+        }
+        MEDIR_TIEMPO_STOP(end)
+        imagenes_flipVertical(&config->dst, dst_img);
+
+        creadorCsv(start, end, config->cant_iteraciones, file, config, type);
+    }
+    imagenes_liberar(config);
+    fclose(file);
+    
+}
+
