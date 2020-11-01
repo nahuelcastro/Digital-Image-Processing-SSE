@@ -57,9 +57,6 @@ cd build/
 ./tp2 ReforzarBrillo -i c ../img/SweetNovember.1600x1200.bmp 35 50 60 20
 
 
-#python3 graphColorBordes.py
-#python3 graphImagenFantasma.py
-#python3 graphReforzarBrillo.py
 cd ..
 cd build2/
 
@@ -117,10 +114,6 @@ cd build2/
 ./tp2 ReforzarBrillo -i c ../img/SweetNovember.1600x1200.bmp 35 50 60 20
 
 
-
-#python3 graphColorBordes.py
-#python3 graphImagenFantasma.py
-#python3 graphReforzarBrillo.py
 
 cd ..
 cd build3/
@@ -181,11 +174,9 @@ cd build3/
 
 cd ..
 
-python3 graphColorBordes.py
 python3 graphImagenFantasma.py
+python3 graphColorBordes.py
 python3 graphReforzarBrillo.py
-
-
 
 echo Terminó
 

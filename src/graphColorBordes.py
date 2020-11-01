@@ -11,7 +11,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 colorBordesC0 = pd.read_csv('./build/ColorBordes.csv', header=None, sep=',')
 colorBordesC2 = pd.read_csv('./build2/ColorBordes.csv', header=None, sep=',')
 colorBordesC3 = pd.read_csv('./build3/ColorBordes.csv', header=None, sep=',')
-tamaños = np.array([32,128,512,2048,7500,8192,30000,120000])
+tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC2 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -81,17 +81,22 @@ for index, x in enumerate(tamañosC3):
 
 
 with PdfPages('ColorBordes_C_vs_ASM.pdf') as pdf:
-    plt.plot(tamaños, resASM, label="ASM", marker="o")
-    plt.plot(tamaños, resC0, label="C0", marker="o")
-    #plt.plot(tamaños, resC2, label="C2", marker="o")
-    plt.plot(tamaños, resC3, label="C3", marker="o", color='red')
-    plt.legend(['ASM','C0','C3'])
+    fig, ax= plt.subplots()
+    ax.plot(tamaños, resASM, label="ASM", marker=".")
+    ax.plot(tamaños, resC0, label="C0", marker=".")
+    ax.plot(tamaños, resC2, label="C2", marker=".")
+    ax.plot(tamaños, resC3, label="C3", marker=".")
+    ax.legend(['ASM','C0','C2','C3'])
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
     plt.title("Grafico de prueba")
-    plt.grid()
+    ax.ticklabel_format(style='plain')
+    ax.axis([0, 2000000, 0, 175000000])
+    plt.grid( linestyle='-', linewidth=1)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(55)
     #plt.show()
-    pdf.savefig()
+    pdf.savefig(bbox_inches='tight')
     plt.close()
 
 #Hace el de ticks divido por millon y label Ticks (Millones)

@@ -4,15 +4,13 @@ import numpy as np            ###librería de cálculo numérico
 from scipy import stats       ###librería de estadística
 import seaborn_qqplot as sqp  ###librería complementaria a seaborn para hacer qqplots
 import matplotlib.pyplot as plt
-import matplotlib.axes as ax
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.gridspec as gridspec
 
 
 
-imagenFantasmaC0 = pd.read_csv('./build/ImagenFantasma.csv', header=None, sep=',')
-imagenFantasmaC2 = pd.read_csv('./build2/ImagenFantasma.csv', header=None, sep=',')
-imagenFantasmaC3 = pd.read_csv('./build3/ImagenFantasma.csv', header=None, sep=',')
+reforzarBrilloC0 = pd.read_csv('./build/ReforzarBrillo.csv', header=None, sep=',')
+reforzarBrilloC2 = pd.read_csv('./build2/ReforzarBrillo.csv', header=None, sep=',')
+reforzarBrilloC3 = pd.read_csv('./build3/ReforzarBrillo.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -22,17 +20,17 @@ tamañosC3 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"4
 implementacion=1
 tamaño=2
 ciclos=3
-for index, row in imagenFantasmaC0.iterrows():
+for index, row in reforzarBrilloC0.iterrows():
     if row[implementacion]=="ASM":
         tamañosASM[str(row[tamaño])].append(row[ciclos])
     else:
         tamañosC0[str(row[tamaño])].append(row[ciclos])
 
-for index, row in imagenFantasmaC2.iterrows():
+for index, row in reforzarBrilloC2.iterrows():
     if row[implementacion]=="C":
         tamañosC2[str(row[tamaño])].append(row[ciclos])
     
-for index, row in imagenFantasmaC3.iterrows():
+for index, row in reforzarBrilloC3.iterrows():
     if row[implementacion]=="C":
         tamañosC3[str(row[tamaño])].append(row[ciclos])
 
@@ -82,7 +80,7 @@ for index, x in enumerate(tamañosC3):
 
 
 
-with PdfPages('ImagenFantasma_C_vs_ASM.pdf') as pdf:
+with PdfPages('ReforzarBrillo_C_vs_ASM.pdf') as pdf:
     fig, ax= plt.subplots()
     ax.plot(tamaños, resASM, label="ASM", marker=".")
     ax.plot(tamaños, resC0, label="C0", marker=".")
@@ -100,6 +98,28 @@ with PdfPages('ImagenFantasma_C_vs_ASM.pdf') as pdf:
     #plt.show()
     pdf.savefig(bbox_inches='tight')
     plt.close()
+
+
+    with PdfPages('ReforzarBrillo_x_tamaño.pdf') as pdf:
+
+
+    plt.figure(figsize=(7, 5))
+    labels = 'ASM', 'O3', 'O0'
+    barValues = [resASM[7],resC3[7],resC0[7]]
+    x = [1,2,3]
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x, barValues,0.5, label='')
+    plt.ylabel('')
+    plt.xlabel("implementaciones")
+    plt.ylabel("Cantidad de ticks")
+    plt.title("Imagen 1600x1200")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    # Show the grid lines as dark grey lines
+    pdf.savefig()
+    plt.close()
+    
+    
 
 #Hace el de ticks divido por millon y label Ticks (Millones)
 
