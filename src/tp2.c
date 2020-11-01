@@ -58,10 +58,10 @@ int main( int argc, char** argv ) {
     filtro_t *filtro = detectar_filtro(&config);
 
     filtro->leer_params(&config, argc, argv);
-    int corridas = 150;
-    //newCorrerFiltro(&config, filtro->aplicador, corridas);
+    int corridas = 10;
+    newCorrerFiltro(&config, filtro->aplicador, corridas);
     
-    correr_filtro_imagen(&config, filtro->aplicador);
+    //correr_filtro_imagen(&config, filtro->aplicador);
     filtro->liberar(&config);
 
     return 0;
