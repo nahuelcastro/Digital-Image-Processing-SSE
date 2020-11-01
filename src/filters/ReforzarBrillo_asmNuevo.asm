@@ -77,7 +77,7 @@ xor r13,r13
     xor r12, r12
     .cicloWidth:        ; j
 
-
+    ;;;;xor r11, r11 ;;;;
     lea edx,[r13d * 4]            ; edx <-  jj * tamaño pixel
     mov eax, width
     mul edx                        ; eax <- (jj * 4) * width
@@ -122,6 +122,8 @@ xor r13,r13
 
     pxor xmm2, xmm2
     pxor xmm3, xmm3
+
+    ;;;;xor r11, r11
     pmovzxbw xmm2, [rdi + r11]           ; xmm2 :  [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + 8]       ; xmm3 :  [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
     
@@ -148,7 +150,7 @@ xor r13,r13
     
       cmp dword r15d, umbralSup
       jg .mayor
-       
+      
       cmp dword r15d, umbralInf
       jl .menor
       
@@ -170,6 +172,8 @@ xor r13,r13
     movdqu xmm13, [mask_levantar_a]
     paddusb xmm2, xmm13 ; levantamos la a , 
   
+    ;;;add rdi, 16
+
     movups [rsi], xmm2
     add rsi, 16
 
@@ -192,69 +196,3 @@ add rsp, 56
 pop rbp
 ret
 
-
-    ;Vas shifteando y agarras los primeros como en el otro shifteo
-
-
-
-
-
-
-
-  ;    movdqu xmm8, [rdi] ; xmm8: [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 | a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-
-
-  ;   xor r14, r14 ;contador que va a chequear que hicimos la comparacion con los 4 pixeles
-  ;   .comparacion: ;vamos a iterar 4 veces para comparar las b de los 4 pixeles
-      
-  ;     ; xmm4 : [     B3/4      |      B2/4     |     B1/4   |     B0/4   ]
-      
-  ;     xor r15, r15
-  ;     extractps r15, xmm4, 0x00   ; Colocamos en r15 el b_i que corresponde 
-  ;     psrldq xmm4, 4
-  ;     extractps r11, xmm8, 0x00   ; Colocamos en r11 el pixel que corresponde
-  ;     psrldq xmm8, 4
-  ;     cmp dword r15d, umbralSup
-  ;     jg .sumaSat
-  ;     cmp dword r15d, umbralInf
-  ;     jl .restaSat
-  ;     .finComparacion:
-  ;     inc r14
-  ;     cmp dword r14d, 3
-  ;     jne .comparacion
-
-    
-
-; ;APARTE:
-;   .sumaSat:
-;     ; xor xmm9, xmm9
-;     ; xor xmm10, xmm10
-;     ; movdqu xmm10, [brilloSup]
-;     ; movdqu xmm9, r11
-;     ; paddsb xmm9, xmm10
-;     ; jmp .finComparacion
-
-;   .restaSat:
-;     ; xor xmm9, xmm9
-;     ; xor xmm10, xmm10
-;     ; movdqu xmm10, [brilloInf]
-;     ; movdqu xmm9, r11
-;     ; psubsb xmm9, xmm10
-;     ; jmp .finComparacion
-
-
-
-
-;   ;reforzarBrillo:
-;     pxor xmm2, xmm2
-;     pxor xmm3, xmm3
-;     pxor xmm5, xmm5
-;     pxor xmm6, xmm6
-;     pmovzxbw xmm2, [rdi + r11]       ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-;     pmovzxbw xmm3, [rdi + r11 + 8]   ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
-;     pmovzxwd xmm6, xmm2              ; xmm6 : [    a_0    |     r_0   |     g_0   |    b_0    ]
-;     psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm2
-;     pmovzxwd xmm2, xmm2              ; xmm2 : [    a_1    |     r_1   |     g_1   |    b_1    ]
-;     pmovzxwd xmm5, xmm3              ; xmm5 : [    a_2    |     r_2   |     g_2   |    b_2    ] 
-;     psrldq xmm2, 8                   ;shift a la derecha x 4 words del xmm3
-;     pmovzxwd xmm3, xmm3              ; xmm3 : [    a_3    |     r_3   |     g_3   |    b_3    ] 
