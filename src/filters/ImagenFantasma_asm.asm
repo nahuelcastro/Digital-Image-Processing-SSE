@@ -96,6 +96,7 @@ xor r13,r13
     xor r11, r11
     mov r11d, eax
 
+
     pmovzxbw xmm2, [rdi + r11]                    ; xmm2 : (ghosting) [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
     pmovzxbw xmm3, [rdi + r11 + d_pixel_size]     ; xmm3 : (ghosting) [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
@@ -181,6 +182,33 @@ xor r13,r13
 
 
     movups [rsi], xmm9 ;movaps [rsi], xmm9
+
+        ; movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                                     movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                                         movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                                             movups [rsi], xmm9 ;movaps [rsi], xmm9
+        ;                                                                                                 movups [rsi], xmm9 ;movaps [rsi], xmm9
+
     add rsi, 16
 
     add r12d, 4

@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-
-reforzarBrilloC0 = pd.read_csv('./build/ReforzarBrillo.csv', header=None, sep=',')
-reforzarBrilloC2 = pd.read_csv('./build2/ReforzarBrillo.csv', header=None, sep=',')
-reforzarBrilloC3 = pd.read_csv('./build3/ReforzarBrillo.csv', header=None, sep=',')
+reforzarBrilloC0 = pd.read_csv(
+    'data/csv_originales/build/ReforzarBrillo.csv', header=None, sep=',')
+reforzarBrilloC2 = pd.read_csv(
+    './build//ReforzarBrillo.csv', header=None, sep=',')
+reforzarBrilloC3 = pd.read_csv(
+    'data/csv_originales/build3/ReforzarBrillo.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -27,7 +29,7 @@ for index, row in reforzarBrilloC0.iterrows():
         tamañosC0[str(row[tamaño])].append(row[ciclos])
 
 for index, row in reforzarBrilloC2.iterrows():
-    if row[implementacion]=="C":
+    if row[implementacion]=="ASM":
         tamañosC2[str(row[tamaño])].append(row[ciclos])
     
 for index, row in reforzarBrilloC3.iterrows():
@@ -86,12 +88,12 @@ with PdfPages('ReforzarBrillo_C_vs_ASM.pdf') as pdf:
     ax.plot(tamaños, resC0, label="C0", marker=".")
     ax.plot(tamaños, resC2, label="C2", marker=".")
     ax.plot(tamaños, resC3, label="C3", marker=".")
-    ax.legend(['ASM','C0','C2','C3'])
+    ax.legend(['ASM','O0','O2','O3'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
-    plt.title("Grafico de prueba")
+    plt.title("Reforzar Brillo")
     ax.ticklabel_format(style='plain')
-    ax.axis([0, 2000000, 0, 175000000])
+    ax.axis([0, 2000000, 0, 180000000])
     plt.grid( linestyle='-', linewidth=1)
     for tick in ax.get_xticklabels():
         tick.set_rotation(55)
@@ -99,27 +101,79 @@ with PdfPages('ReforzarBrillo_C_vs_ASM.pdf') as pdf:
     pdf.savefig(bbox_inches='tight')
     plt.close()
 
-
-    with PdfPages('ReforzarBrillo_x_tamaño.pdf') as pdf:
-
-
-    plt.figure(figsize=(7, 5))
-    labels = 'ASM', 'O3', 'O0'
-    barValues = [resASM[7],resC3[7],resC0[7]]
-    x = [1,2,3]
+with PdfPages('ReforzarBrillo_C_vs_ASM_Viejo.pdf') as pdf:
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x, barValues,0.5, label='')
+    ax.plot(tamaños, resASM, label="ASM", marker=".")
+    ax.plot(tamaños, resC2, label="ASM - V", marker=".")
+    ax.legend(['ASM', 'ASM - V'], loc='upper left')
+    plt.xlabel("Cantidad de pixeles")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Reforzar Brillo")
+    #ax.set_xTicks = ['512','2048','8192','32768','120000','131072','480000','1920000']
+    #ax.set_yTicks = [str(yTicks[i]) for i in range(0, len(yTicks))]
+    ax.ticklabel_format(style='plain')
+    ax.axis([0, 2000000, 0, 30000000])
+    plt.grid(linestyle='-', linewidth=1)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(55)
+    #plt.show()
+    pdf.savefig(bbox_inches='tight')
+    plt.close()
+
+with PdfPages('ReforzarBrillo_x_tamaño.pdf') as pdf:
+    plt.figure(figsize=(7, 5))
+    labels = 'ASM', 'O3','O2','O0'
+    barValues = [resASM[7],resC3[7],resC2[7],resC0[7]]
+    x = [1,2,3,4]
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x, barValues,0.7, label='')
     plt.ylabel('')
-    plt.xlabel("implementaciones")
-    plt.ylabel("Cantidad de ticks")
-    plt.title("Imagen 1600x1200")
+    plt.xlabel("Implementaciones")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Reforzar Brillo 1600x1200")
+    ax.ticklabel_format(style='plain')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    # Show the grid lines as dark grey lines
-    pdf.savefig()
+    plt.grid(linestyle='-', linewidth=1, axis='y')
+    pdf.savefig(bbox_inches='tight')
     plt.close()
     
     
+
+
+with PdfPages('ReforzarBrillo_x_tamaño_viejo.pdf') as pdf:
+    #plt.figure(figsize=(7, 5))
+    labels = 'ASM', 'ASM - V'
+    barValues = [resASM[7], resC2[7]]
+    x = [1, 2]
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x, barValues, 0.7, label='')
+    plt.ylabel('')
+    plt.xlabel("Implementaciones")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Reforzar Brillo 1600x1200")
+    ax.ticklabel_format(style='plain')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    plt.grid(linestyle='-', linewidth=1, axis='y')
+    pdf.savefig(bbox_inches='tight')
+    plt.close()
+
+def calcularPorcentaje(asm, c):
+    print (asm)
+    print(c)
+    return int((asm*100)/c)
+
+print (resC2)
+
+asm_vs_o3 = calcularPorcentaje(resASM[7], resC3[7])
+asm_vs_o2 = calcularPorcentaje(resASM[7], resC2[7])
+asm_vs_o0 = calcularPorcentaje(resASM[7], resC0[7])
+
+print("reforzarBrillo_asm_vs_O0: " + str(asm_vs_o0) + '%')
+print("reforzarBrillo_asm_vs_O2: " + str(asm_vs_o2) + '%')
+print("reforzarBrillo_asm_vs_O3: " + str(asm_vs_o3) + '%' + "\n")
+
 
 #Hace el de ticks divido por millon y label Ticks (Millones)
 

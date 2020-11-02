@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-
-colorBordesC0 = pd.read_csv('./build/ColorBordes.csv', header=None, sep=',')
-colorBordesC2 = pd.read_csv('./build2/ColorBordes.csv', header=None, sep=',')
-colorBordesC3 = pd.read_csv('./build3/ColorBordes.csv', header=None, sep=',')
+colorBordesC0 = pd.read_csv(
+    'data/csv_originales/build/ColorBordes.csv', header=None, sep=',')
+colorBordesC2 = pd.read_csv(
+    './build/ColorBordes.csv', header=None, sep=',')
+colorBordesC3 = pd.read_csv(
+    'data/csv_originales/build3/ColorBordes.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -27,7 +29,7 @@ for index, row in colorBordesC0.iterrows():
         tamañosC0[str(row[tamaño])].append(row[ciclos])
 
 for index, row in colorBordesC2.iterrows():
-    if row[implementacion]=="C":
+    if row[implementacion]=="ASM":
         tamañosC2[str(row[tamaño])].append(row[ciclos])
     
 for index, row in colorBordesC3.iterrows():
@@ -83,21 +85,53 @@ for index, x in enumerate(tamañosC3):
 with PdfPages('ColorBordes_C_vs_ASM.pdf') as pdf:
     fig, ax= plt.subplots()
     ax.plot(tamaños, resASM, label="ASM", marker=".")
-    ax.plot(tamaños, resC0, label="C0", marker=".")
-    ax.plot(tamaños, resC2, label="C2", marker=".")
-    ax.plot(tamaños, resC3, label="C3", marker=".")
-    ax.legend(['ASM','C0','C2','C3'])
+    ax.plot(tamaños, resC0, label="O0", marker=".")
+    ax.plot(tamaños, resC2, label="ASM - V", marker=".")
+    ax.plot(tamaños, resC3, label="O3", marker=".")
+    ax.legend(['ASM', 'O0', 'ASM - V', 'O3'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
-    plt.title("Grafico de prueba")
+    plt.title("Color Bordes")
     ax.ticklabel_format(style='plain')
-    ax.axis([0, 2000000, 0, 175000000])
+    ax.axis([0, 2000000, 0, 180000000])
     plt.grid( linestyle='-', linewidth=1)
     for tick in ax.get_xticklabels():
         tick.set_rotation(55)
     #plt.show()
     pdf.savefig(bbox_inches='tight')
     plt.close()
+
+with PdfPages('ColoresBordes_x_tamaño.pdf') as pdf:
+    plt.figure(figsize=(7, 5))
+    labels = 'ASM', 'O3', 'ASM - V', 'O0'
+    barValues = [resASM[7],resC3[7],resC2[7], resC0[7]]
+    x = [1,2,3,4]
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x, barValues,0.7, label='')
+    plt.ylabel('')
+    plt.xlabel("Implementaciones")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Color Bordes 1600x1200")
+    ax.ticklabel_format(style='plain')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    plt.grid(linestyle='-', linewidth=1, axis='y')
+    pdf.savefig(bbox_inches='tight')
+    plt.close()
+
+
+
+def calcularPorcentaje(asm, c):
+    return int((asm*100)/c)
+
+
+asm_vs_o3 = calcularPorcentaje(resASM[7], resC3[7])
+asm_vs_o2 = calcularPorcentaje(resASM[7], resC2[7])
+asm_vs_o0 = calcularPorcentaje(resASM[7], resC0[7])
+
+print("colorBordes_asm_vs_O0: " + str(asm_vs_o0) + " %")
+print("colorBordes_asm_vs_O2: " + str(asm_vs_o2) + " %")
+print("colorBordes_asm_vs_O3: " + str(asm_vs_o3) + " %" + "\n")
 
 #Hace el de ticks divido por millon y label Ticks (Millones)
 
