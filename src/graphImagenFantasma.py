@@ -11,11 +11,15 @@ import matplotlib.gridspec as gridspec
 
 
 imagenFantasmaC0 = pd.read_csv(
-    'data/csv_originales/build/ImagenFantasma.csv', header=None, sep=',')
+    'data/csv_originales/3/build/ImagenFantasma.csv', header=None, sep=',')
+# imagenFantasmaC2 = pd.read_csv(
+#     './build/ImagenFantasma.csv', header=None, sep=',')
 imagenFantasmaC2 = pd.read_csv(
-    './build//ImagenFantasma.csv', header=None, sep=',')
+    'data/csv_originales/ReforzarVertical/ReforzarBrillo.csv', header=None, sep=',')
+# imagenFantasmaC2 = pd.read_csv(
+#     'data/csv_originales/asm_2px/ImagenFantasma.csv', header=None, sep=',')
 imagenFantasmaC3 = pd.read_csv(
-    'data/csv_originales/build3/ImagenFantasma.csv', header=None, sep=',')
+    'data/csv_originales/3/build3/ImagenFantasma.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -48,20 +52,20 @@ yTicks=[]
 
 for index, x in enumerate(tamañosC0):
     snsArray = pd.Series(tamañosC0[x])
-    tamañosC0[x] = snsArray[snsArray.between(snsArray.quantile(.10), snsArray.quantile(.90))]
+    tamañosC0[x] = snsArray[snsArray.between(snsArray.quantile(.15), snsArray.quantile(.85))]
 
 for index, x in enumerate(tamañosC2):
     snsArray = pd.Series(tamañosC2[x])
-    tamañosC2[x] = snsArray[snsArray.between(snsArray.quantile(.10), snsArray.quantile(.90))]
+    tamañosC2[x] = snsArray[snsArray.between(snsArray.quantile(.15), snsArray.quantile(.85))]
 
 for index, x in enumerate(tamañosC3):
     snsArray = pd.Series(tamañosC3[x])
-    tamañosC3[x] = snsArray[snsArray.between(snsArray.quantile(.10), snsArray.quantile(.90))]
+    tamañosC3[x] = snsArray[snsArray.between(snsArray.quantile(.15), snsArray.quantile(.85))]
 
 
 for index, x in enumerate(tamañosASM):
     snsArray = pd.Series(tamañosASM[x])
-    tamañosASM[x] = snsArray[snsArray.between(snsArray.quantile(.10), snsArray.quantile(.90))]
+    tamañosASM[x] = snsArray[snsArray.between(snsArray.quantile(.15), snsArray.quantile(.85))]
 
 for index, x in enumerate(tamañosASM):
     npArray = np.array(tamañosASM[x])
@@ -92,11 +96,11 @@ for index, x in enumerate(tamañosC3):
 
 with PdfPages('ImagenFantasma_C_vs_ASM.pdf') as pdf:
     fig, ax= plt.subplots()
-    ax.plot(tamaños, resASM, label="ASM", marker=".")
+    ax.plot(tamaños, resASM, label="ASM original", marker=".")
     ax.plot(tamaños, resC0, label="C0", marker=".")
-    ax.plot(tamaños, resC2, label="ASM - V", marker=".")
+    ax.plot(tamaños, resC2, label="ASM 2px", marker=".")
     ax.plot(tamaños, resC3, label="C3", marker=".")
-    ax.legend(['ASM', 'O0', 'ASM - V', 'O3'], loc='upper left')
+    ax.legend(['ASM original', 'O0', 'ASM 2px', 'O3'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
     plt.title("Imagen Fantasma")
@@ -105,6 +109,27 @@ with PdfPages('ImagenFantasma_C_vs_ASM.pdf') as pdf:
     ax.ticklabel_format(style='plain')
     ax.axis([0, 2000000, 0, 180000000])
     plt.grid( linestyle='-', linewidth=1)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(55)
+    #plt.show()
+    pdf.savefig(bbox_inches='tight')
+    plt.close()
+    
+with PdfPages('ImagenFantasma_C_vs_ASM_masAccesos.pdf') as pdf:
+    fig, ax = plt.subplots()
+    ax.plot(tamaños, resASM, label="ASM original", marker=".")
+    ax.plot(tamaños, resC0, label="C0", marker=".")
+    ax.plot(tamaños, resC2, label="ASM + accesos", marker=".")
+    ax.plot(tamaños, resC3, label="C3", marker=".")
+    ax.legend(['ASM original', 'O0', 'ASM + accesos', 'O3'], loc='upper left')
+    plt.xlabel("Cantidad de pixeles")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Imagen Fantasma")
+    #ax.set_xTicks = ['512','2048','8192','32768','120000','131072','480000','1920000']
+    #ax.set_yTicks = [str(yTicks[i]) for i in range(0, len(yTicks))]
+    ax.ticklabel_format(style='plain')
+    ax.axis([0, 2000000, 0, 180000000])
+    plt.grid(linestyle='-', linewidth=1)
     for tick in ax.get_xticklabels():
         tick.set_rotation(55)
     #plt.show()
@@ -129,28 +154,104 @@ with PdfPages('ImagenFantasma_ASM_vs_ASM_Viejo.pdf') as pdf:
     #plt.show()
     pdf.savefig(bbox_inches='tight')
     plt.close()
-
-with PdfPages('ImagenFantasma_x_tamaño.pdf') as pdf:
-    #plt.figure(figsize=(7, 5))
-    labels = 'ASM', 'O3', 'ASM - V', 'O0'
-    barValues = [resASM[7],resC3[7],resC2[7],resC0[7]]
-    x = [1,2,3,4]
+    
+with PdfPages('ImagenFantasma_ASM_vs_ASM_MasAccesos.pdf') as pdf:
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x, barValues,0.7, label='')
-    plt.ylabel('')
-    plt.xlabel("Implementaciones")
+    ax.plot(tamaños, resASM, label="ASM", marker=".")
+    ax.plot(tamaños, resC2, label="ASM - V", marker=".")
+    ax.legend(['ASM original', 'ASM + accesos'], loc='upper left')
+    plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
-    plt.title("Imagen Fantasma 1600x1200")
+    plt.title("Imagen Fantasma")
+    #ax.set_xTicks = ['512','2048','8192','32768','120000','131072','480000','1920000']
+    #ax.set_yTicks = [str(yTicks[i]) for i in range(0, len(yTicks))]
     ax.ticklabel_format(style='plain')
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    plt.grid(linestyle='-', linewidth=1, axis='y')
+    ax.axis([0, 2000000, 0, 30000000])
+    plt.grid(linestyle='-', linewidth=1)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(55)
+    #plt.show()
+    pdf.savefig(bbox_inches='tight')
+    plt.close()
+    
+
+with PdfPages('ImagenFantasma_ASM_vs_ASM_2px.pdf') as pdf:
+    fig, ax = plt.subplots()
+    ax.plot(tamaños, resASM, label="ASM original", marker=".")
+    ax.plot(tamaños, resC2, label="ASM 2px", marker=".")
+    ax.legend(['ASM original', 'ASM 2px'], loc='upper left')
+    plt.xlabel("Cantidad de pixeles")
+    plt.ylabel("Ciclos de clock")
+    plt.title("Imagen Fantasma")
+    #ax.set_xTicks = ['512','2048','8192','32768','120000','131072','480000','1920000']
+    #ax.set_yTicks = [str(yTicks[i]) for i in range(0, len(yTicks))]
+    ax.ticklabel_format(style='plain')
+    ax.axis([0, 2000000, 0, 40000000])
+    plt.grid(linestyle='-', linewidth=1)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(55)
+    #plt.show()
     pdf.savefig(bbox_inches='tight')
     plt.close()
 
-with PdfPages('ImagenFantasma_x_tamaño_viejo.pdf') as pdf:
+# with PdfPages('ImagenFantasma_x_tamaño.pdf') as pdf:
+#     #plt.figure(figsize=(7, 5))
+#     labels = 'ASM', 'O3', 'ASM - V', 'O0'
+#     barValues = [resASM[7],resC3[7],resC2[7],resC0[7]]
+#     x = [1,2,3,4]
+#     fig, ax = plt.subplots()
+#     rects1 = ax.bar(x, barValues,0.7, label='')
+#     plt.ylabel('')
+#     plt.xlabel("Implementaciones")
+#     plt.ylabel("Ciclos de clock")
+#     plt.title("Imagen Fantasma 1600x1200")
+#     ax.ticklabel_format(style='plain')
+#     ax.set_xticks(x)
+#     ax.set_xticklabels(labels)
+#     plt.grid(linestyle='-', linewidth=1, axis='y')
+#     pdf.savefig(bbox_inches='tight')
+#     plt.close()
+
+# with PdfPages('ImagenFantasma_x_tamaño_viejo.pdf') as pdf:
+#     #plt.figure(figsize=(7, 5))
+#     labels = 'ASM', 'ASM - V'
+#     barValues = [resASM[7], resC2[7]]
+#     x = [1, 2]
+#     fig, ax = plt.subplots()
+#     rects1 = ax.bar(x, barValues, 0.7, label='')
+#     plt.ylabel('')
+#     plt.xlabel("Implementaciones")
+#     plt.ylabel("Ciclos de clock")
+#     plt.title("Imagen Fantasma 1600x1200")
+#     ax.ticklabel_format(style='plain')
+#     ax.set_xticks(x)
+#     ax.set_xticklabels(labels)
+#     plt.grid(linestyle='-', linewidth=1, axis='y')
+#     pdf.savefig(bbox_inches='tight')
+#     plt.close()
+    
+# with PdfPages('ImagenFantasma_bar_asm_vs_asmMasAccesos.pdf') as pdf:
+#         #plt.figure(figsize=(7, 5))
+#     labels = 'ASM original', 'ASM + accesos'
+#     barValues = [resASM[7], resC2[7]]
+#     x = [1, 2]
+#     fig, ax = plt.subplots()
+#     rects1 = ax.bar(x, barValues, 0.7, label='')
+#     plt.ylabel('')
+#     plt.xlabel("Implementaciones")
+#     plt.ylabel("Ciclos de clock")
+#     plt.title("Imagen Fantasma 1600x1200")
+#     ax.ticklabel_format(style='plain')
+#     ax.set_xticks(x)
+#     ax.set_xticklabels(labels)
+#     plt.grid(linestyle='-', linewidth=1, axis='y')
+#     pdf.savefig(bbox_inches='tight')
+#     plt.close()
+    
+    
+with PdfPages('ImagenFantasma_bar_asm_vs_asm_2px.pdf') as pdf:
     #plt.figure(figsize=(7, 5))
-    labels = 'ASM', 'ASM - V'
+    labels = 'ASM original', 'ASM 2px'
     barValues = [resASM[7], resC2[7]]
     x = [1, 2]
     fig, ax = plt.subplots()
@@ -224,3 +325,8 @@ for i in range(0,8):
 #    pdf.savefig()
 #    plt.close()
 #    plt.show()
+
+
+# pdftoppm -jpeg ImagenFantasma_ASM_vs_ASM_2px.pdf imagenFantasmaAsmVsAsm2px
+# pdftoppm -jpeg ImagenFantasma_bar_asm_vs_asm_2px.pdf imagenFantasmaBarAsmVsAsm2px
+# pdftoppm -jpeg ImagenFantasma_C_vs_ASM.pdf imagenFantasmaCVsAsm

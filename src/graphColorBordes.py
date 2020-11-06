@@ -8,11 +8,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 colorBordesC0 = pd.read_csv(
-    'data/csv_originales/build/ColorBordes.csv', header=None, sep=',')
+    'data/csv_originales/2/build/ColorBordes.csv', header=None, sep=',')
 colorBordesC2 = pd.read_csv(
     './build/ColorBordes.csv', header=None, sep=',')
 colorBordesC3 = pd.read_csv(
-    'data/csv_originales/build3/ColorBordes.csv', header=None, sep=',')
+    'data/csv_originales/2/build3/ColorBordes.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
