@@ -107,17 +107,11 @@ packuswb xmm12, xmm12   ; xmm12 : [  bi  |  bi  |  bi  |  bi  |  bi  |  bi   | b
 ; {[0] = 41, [1] = 34, [2] = 17, [3] = -1, [4] = 41, [5] = 34, [6] = 17, [7] = -1, [8] = 41, [9] = 34, [10] = 17, [11] = -1, [12] = 41, [13] = 34, [14] = 17, [15] = -1}
 
 
-mov rdx, rsi  ; salvo rdi 
-mov rcx, rdi  ; salvo rsi 
+xor r13,r13
+.cicloHeight:           ; i
 
-xor r12,r12
-.cicloWidth:        ; j
-
-    mov rsi, rdx    
-    mov rdi, rcx    
-
-    xor r13, r13
-    .cicloHeight:           ; i    
+    xor r12, r12
+    .cicloWidth:        ; j
 
         ;rsi + r12d * 4 + r13d * width * 4  
 
@@ -220,8 +214,10 @@ xor r12,r12
         ;  0 0 0 0 0 3 3 0 0 0 0  Me
 
 
+
+
     .fin1:
-       movdqu xmm2, xmm14
+        movdqu xmm2, xmm14
 
         paddusb xmm2, xmm9
         psubusb xmm2, xmm10 
@@ -247,23 +243,23 @@ xor r12,r12
         mov dword r11d, x3_row_bits
         movd [rsi + r11], xmm2
 
+        add rdi, 4
+        add rsi, 4
 
-        add rdi, x3_row_bits
-        add rdi, x1_row_bits
-        add rsi, x3_row_bits    
-        add rsi, x1_row_bits
+        add r12d, 1
+        cmp dword r12d, width
+        jl .cicloWidth
 
-        add r13d, 4
-        cmp dword r13d, height
-        jl .cicloHeight
-        
-
-    add rdx, 4
-    add rcx, 4 
+    add r13d, 4
+    add rdi, x3_row_bits
+    ; add rdi, x1_row_bits
     
-    add r12d, 1
-    cmp dword r12d, width
-    jl .cicloWidth
+    add rsi, x3_row_bits
+    ; add rsi, x1_row_bits
+    ; cmp dword r13d, height
+    
+    cmp dword r13d, height
+    jl .cicloHeight
 
 
 .fin:
