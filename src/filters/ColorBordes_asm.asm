@@ -46,10 +46,9 @@ sub edx, 1
 sub ecx, 1
 mov width_dec  , edx
 mov height_dec , ecx
-
-
 mov rsi_original, rsi
 
+; aumentamos rsi, para no escribir en el marco
 xor r13, r13
 mov eax, 4
 mul dword width
@@ -57,13 +56,14 @@ add eax, 4
 mov r13d, eax
 add rsi, r13
 
+
 xor r13,r13
-inc r13d
-.cicloHeight:           ; j
+inc r13d                    ; aumentamos j para no acceder a memoria invalida
+.cicloHeight:               ; j
 
     xor r12, r12
-    inc r12d
-    .cicloWidth:        ; i
+    inc r12d                ; aumentamos i para no acceder a memoria invalida
+    .cicloWidth:            ; i
 
         pxor xmm0, xmm0     ; acum px1 y px2
         pxor xmm1, xmm1     ; acum px3 y px4
@@ -90,7 +90,7 @@ inc r13d
             xor eax, eax
             mov eax, r15d
             mul dword width         ; eax <- width * jj
-            add eax, r14d            ; eax <- (width * jj) + (i-1)
+            add eax, r14d           ; eax <- (width * jj) + (i-1)
             xor r11, r11
             lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (i-1))
 
@@ -103,12 +103,15 @@ inc r13d
 
             cmp dword r11d, finFoto
             jge .continuaCiclojj
-            pmovzxbw xmm4, [rdi + r11 + 16]    ; xmm4 : [ a_6 | r_6 | g_6 | b_6 | a_5 | r_5 | g_5 | b_5 ]
+            pmovzxbw xmm4, [rdi + r11 + 16]         ; xmm4 : [ a_6 | r_6 | g_6 | b_6 | a_5 | r_5 | g_5 | b_5 ]
             
             .continuaCiclojj:
             
-                pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-                pmovzxbw xmm3, [rdi + r11 + 8]     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+                movdqu xmm14, [rdi + r11]
+
+                pmovzxbw xmm2, xmm14         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
+                psrldq xmm14, 8
+                pmovzxbw xmm3, xmm14     ; xmm3 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
                 psubw xmm2, xmm3    ; restamos
                 psubw xmm3, xmm4
@@ -135,13 +138,17 @@ inc r13d
             xor eax, eax
             mov eax, r13d
             dec eax
-            mul dword width         ; eax <- width * (j-1)
-            add eax, r14d           ; eax <- (width * (j-1)) + (ii)
+            mul dword width                 ; eax <- width * (j-1)
+            add eax, r14d                   ; eax <- (width * (j-1)) + (ii)
             xor r11, r11
-            lea r11d, [eax * 4]     ; r11 <- 4* (width * jj + (ii))
-           
-            pmovzxbw xmm2, [rdi + r11]         ; xmm2 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
-            pmovzxbw xmm4, [rdi + r11 + 8]     ; xmm4 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            lea r11d, [eax * 4]             ; r11 <- 4* (width * jj + (ii))
+            
+            movdqu xmm14, [rdi + r11]
+            
+            pmovzxbw xmm2,xmm14
+            psrldq xmm14, 8
+            pmovzxbw xmm4,xmm14
+                            
 
             mov eax, 8; 8
             mul dword width
@@ -156,7 +163,7 @@ inc r13d
 
             cmp dword r11d, finFoto
             jge .continuaCicloii
-            pmovzxbw xmm5, [rdi + r11 + 8]      ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
+            pmovzxbw xmm5, [rdi + r11 + 8]           ; xmm5 : [ a_3 | r_3 | g_3 | b_3 | a_2 | r_2 | g_2 | b_2 ]
 
             .continuaCicloii:
                 pmovzxbw xmm3, [rdi + r11 ]         ; xmm3 : [ a_1 | r_1 | g_1 | b_1 | a_0 | r_0 | g_0 | b_0 ]
@@ -178,17 +185,14 @@ inc r13d
 
         ; hardcodeo la A
         movdqu xmm6, [mask_levantar_a]
-        paddw xmm0, xmm6            ; todas las a + 255
+        paddw xmm0, xmm6                ; todas las a + 255
         paddw xmm1, xmm6
 
-        ; IMPORTANTE tengo que ver si toma como pre que vienen con signo o sin signo
-        ; y no se si viene sin signo o signo
         packuswb xmm0, xmm1
-
-        movups [rsi], xmm0 ;movaps [rsi], xmm0
+        movups [rsi], xmm0  ;movaps [rsi], xmm0
 
         add rsi, 16
-        add r12d, 4 ; con 8 anda 1/4 * 2
+        add r12d, 4         ; con 8 anda 1/4 * 2
 
         cmp dword r12d, width_dec   
         jl .cicloWidth
@@ -196,6 +200,8 @@ inc r13d
     inc r13d
     cmp dword r13d, height_dec
     jl .cicloHeight
+
+
 
 
 whiteBorder:
@@ -238,7 +244,7 @@ whiteBorder:
 
         movdqu xmm0, [rsi]
         movdqu xmm2, [mask_vertical]
-        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        paddusb xmm0, xmm2              ;paddusb -> suma saturada sin signo de a bytes
         movdqu [rsi], xmm0
 
         xor r13, r13
@@ -251,7 +257,7 @@ whiteBorder:
 
         movdqu xmm0, [rsi + r13]
         movdqu xmm2, [mask_vertical]
-        paddusb xmm0, xmm2  ;paddusb -> suma saturada sin signo de a bytes
+        paddusb xmm0, xmm2              ;paddusb -> suma saturada sin signo de a bytes
         movdqu [rsi + r13], xmm0
 
 

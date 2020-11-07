@@ -113,6 +113,7 @@ mov rcx, rdi  ; salvo rsi
 xor r12,r12
 .cicloWidth:        ; j
 
+
     mov rsi, rdx    
     mov rdi, rcx    
 
@@ -138,7 +139,14 @@ xor r12,r12
         packssdw xmm1, xmm2
         packssdw xmm3, xmm4
 
+
         packuswb xmm1, xmm3            
+
+        movdqu xmm4, [mask_filter_a]   
+        pand xmm2, xmm4                 ; xmm2 : [   0   |   r  |   2g   |   b    |   0    |     r    |    2g   |   b   ]
+        movdqu xmm13, [mask_filter_g]
+        pand xmm13, xmm2                ; xmm13 : [   0  |   0  |    gg  |   0    |   0    |     0    |    gg   |   0   ]
+        paddw xmm2, xmm13               ; xmm2 :  [   0  |   r  |   2g   |   b    |   0    |     r    |    2g   |   b   ]
 
 
         movdqu xmm14, xmm1           ; hacemos copia para el final
@@ -156,6 +164,7 @@ xor r12,r12
         pand xmm13, xmm2                ; xmm13 : [   0  |   0  |    gg  |   0    |   0    |     0    |    gg   |   0   ]
         paddw xmm2, xmm13               ; xmm2 :  [   0  |   r  |   2g   |   b    |   0    |     r    |    2g   |   b   ]
 
+
         
         pand xmm3, xmm4                 ; xmm3  : [   0  |   r   |   g    |   b    |   0    |    r     |   g    |   b     ]
         movdqu xmm13, [mask_filter_g]
@@ -167,6 +176,8 @@ xor r12,r12
         xorps xmm5, xmm5
         phaddsw xmm2, xmm5            ; xmm5 : [   0   |    0   |    0   |    0   |   B3   |    B2    |    B1   |   B0   ]
 
+        ; */
+
 
         pxor xmm4, xmm4
         movdqu xmm6, [cuatro]
@@ -176,6 +187,7 @@ xor r12,r12
         roundps xmm4, xmm4, 3       ; Redondeo a 0
         cvtps2dq xmm4, xmm4         ; convierto float a int_32
         
+
 
 
 
