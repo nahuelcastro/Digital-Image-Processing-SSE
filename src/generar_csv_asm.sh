@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 #!/bin/bash
-=======
-#!/bin/zsh
->>>>>>> 80655069752b6e565825a86ab68630dbff9d059e
+
 echo Arranca...
 
 make clean
@@ -67,7 +64,7 @@ cd ..
 cd build2/
 
 
-<<<<<<< HEAD
+
 #  ./tp2 ImagenFantasma -i asm ../img/SweetNovember.32x16.bmp 30 15 
 #  ./tp2 ColorBordes -i asm ../img/SweetNovember.32x16.bmp 
 #  ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.32x16.bmp 35 50 60 20
@@ -92,32 +89,6 @@ cd build2/
 #  ./tp2 ImagenFantasma -i asm ../img/SweetNovember.1600x1200.bmp 30 15 
 #  ./tp2 ColorBordes -i asm ../img/SweetNovember.1600x1200.bmp 
 #  ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.1600x1200.bmp 35 50 60 20
-=======
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.32x16.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.32x16.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.32x16.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.64x32.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.64x32.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.64x32.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.128x64.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.128x64.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.128x64.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.256x128.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.256x128.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.256x128.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.400x300.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.400x300.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.400x300.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.512x256.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.512x256.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.512x256.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.800x600.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.800x600.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.800x600.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.1600x1200.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.1600x1200.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.1600x1200.bmp 35 50 60 20
->>>>>>> 80655069752b6e565825a86ab68630dbff9d059e
  
 # c 
 
@@ -152,7 +123,7 @@ cd ..
 cd build3/
 
 
-<<<<<<< HEAD
+
 #  ./tp2 ImagenFantasma -i asm ../img/SweetNovember.32x16.bmp 30 15 
 #  ./tp2 ColorBordes -i asm ../img/SweetNovember.32x16.bmp 
 #  ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.32x16.bmp 35 50 60 20
@@ -178,35 +149,7 @@ cd build3/
 #  ./tp2 ColorBordes -i asm ../img/SweetNovember.1600x1200.bmp 
 #  ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.1600x1200.bmp 35 50 60 20
  
-# # c 
-=======
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.32x16.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.32x16.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.32x16.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.64x32.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.64x32.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.64x32.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.128x64.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.128x64.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.128x64.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.256x128.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.256x128.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.256x128.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.400x300.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.400x300.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.400x300.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.512x256.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.512x256.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.512x256.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.800x600.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.800x600.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.800x600.bmp 35 50 60 20
- ./tp2 ImagenFantasma -i asm ../img/SweetNovember.1600x1200.bmp 30 15 
- ./tp2 ColorBordes -i asm ../img/SweetNovember.1600x1200.bmp 
- ./tp2 ReforzarBrillo -i asm ../img/SweetNovember.1600x1200.bmp 35 50 60 20
- 
 # c 
->>>>>>> 80655069752b6e565825a86ab68630dbff9d059e
 
 # ./tp2 ImagenFantasma -i c ../img/SweetNovember.32x16.bmp 30 15 
 # ./tp2 ColorBordes -i c ../img/SweetNovember.32x16.bmp 

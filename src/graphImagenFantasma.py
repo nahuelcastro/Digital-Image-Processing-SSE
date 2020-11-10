@@ -11,15 +11,15 @@ import matplotlib.gridspec as gridspec
 
 
 imagenFantasmaC0 = pd.read_csv(
-    'data/csv_originales/3/build/ImagenFantasma.csv', header=None, sep=',')
+    'data/csv_originales/6/build/ImagenFantasma.csv', header=None, sep=',')
 # imagenFantasmaC2 = pd.read_csv(
 #     './build/ImagenFantasma.csv', header=None, sep=',')
 imagenFantasmaC2 = pd.read_csv(
-    'data/csv_originales/ReforzarVertical/ReforzarBrillo.csv', header=None, sep=',')
+    'data/csv_originales/asm_masAccesos/ImagenFantasma.csv', header=None, sep=',')
 # imagenFantasmaC2 = pd.read_csv(
 #     'data/csv_originales/asm_2px/ImagenFantasma.csv', header=None, sep=',')
 imagenFantasmaC3 = pd.read_csv(
-    'data/csv_originales/3/build3/ImagenFantasma.csv', header=None, sep=',')
+    'data/csv_originales/6/build3/ImagenFantasma.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
 tamañosASM = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
 tamañosC0 = {"512":[],"2048":[],"8192":[],"32768":[],"120000":[],"131072":[],"480000":[],"1920000":[]}
@@ -140,7 +140,7 @@ with PdfPages('ImagenFantasma_ASM_vs_ASM_Viejo.pdf') as pdf:
     fig, ax = plt.subplots()
     ax.plot(tamaños, resASM, label="ASM", marker=".")
     ax.plot(tamaños, resC2, label="ASM - V", marker=".")
-    ax.legend(['ASM', 'ASM - V'], loc='upper left')
+    ax.legend(['ASM', 'ASM + accesos'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
     plt.title("Imagen Fantasma")
@@ -158,7 +158,7 @@ with PdfPages('ImagenFantasma_ASM_vs_ASM_Viejo.pdf') as pdf:
 with PdfPages('ImagenFantasma_ASM_vs_ASM_MasAccesos.pdf') as pdf:
     fig, ax = plt.subplots()
     ax.plot(tamaños, resASM, label="ASM", marker=".")
-    ax.plot(tamaños, resC2, label="ASM - V", marker=".")
+    ax.plot(tamaños, resC2, label="ASM + accesos", marker=".")
     ax.legend(['ASM original', 'ASM + accesos'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
@@ -175,11 +175,11 @@ with PdfPages('ImagenFantasma_ASM_vs_ASM_MasAccesos.pdf') as pdf:
     plt.close()
     
 
-with PdfPages('ImagenFantasma_ASM_vs_ASM_2px.pdf') as pdf:
+with PdfPages('ImagenFantasma_ASM_vs_ASM_+accesos.pdf') as pdf:
     fig, ax = plt.subplots()
     ax.plot(tamaños, resASM, label="ASM original", marker=".")
-    ax.plot(tamaños, resC2, label="ASM 2px", marker=".")
-    ax.legend(['ASM original', 'ASM 2px'], loc='upper left')
+    ax.plot(tamaños, resC2, label="ASM + accesos", marker=".")
+    ax.legend(['ASM original', 'ASM + accesos'], loc='upper left')
     plt.xlabel("Cantidad de pixeles")
     plt.ylabel("Ciclos de clock")
     plt.title("Imagen Fantasma")
@@ -251,7 +251,7 @@ with PdfPages('ImagenFantasma_ASM_vs_ASM_2px.pdf') as pdf:
     
 with PdfPages('ImagenFantasma_bar_asm_vs_asm_2px.pdf') as pdf:
     #plt.figure(figsize=(7, 5))
-    labels = 'ASM original', 'ASM 2px'
+    labels = 'ASM original', 'ASM + accesos'
     barValues = [resASM[7], resC2[7]]
     x = [1, 2]
     fig, ax = plt.subplots()

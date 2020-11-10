@@ -8,11 +8,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 reforzarBrilloC0 = pd.read_csv(
-    'data/csv_originales/5/build/ReforzarBrillo.csv', header=None, sep=',')
+    'data/csv_originales/4/build/ReforzarBrillo.csv', header=None, sep=',')
 reforzarBrilloC2 = pd.read_csv(
     'data/csv_originales/vertical/ReforzarBrillo.csv', header=None, sep=',')
 reforzarBrilloC3 = pd.read_csv(
-    'data/csv_originales/5/build3/ReforzarBrillo.csv', header=None, sep=',')
+    'data/csv_originales/4/build3/ReforzarBrillo.csv', header=None, sep=',')
 # reforzarBrilloC3 = pd.read_csv(
 #     'data/csv_originales/3/build3/ReforzarBrillo.csv', header=None, sep=',')
 tamaños = np.array([512,2048,8192,32768,120000,131072,480000,1920000])
