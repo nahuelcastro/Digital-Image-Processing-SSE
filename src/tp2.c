@@ -60,9 +60,10 @@ int main( int argc, char** argv ) {
     filtro->leer_params(&config, argc, argv);
 
     int corridas = 300;
-    newCorrerFiltro(&config, filtro->aplicador, corridas);
+    // comentar correr_filtro_imagen y descomentar el newCorrerFiltro para hacer las mediciones de performance
+    // newCorrerFiltro(&config, filtro->aplicador, corridas);
     
-    // correr_filtro_imagen(&config, filtro->aplicador);
+    correr_filtro_imagen(&config, filtro->aplicador);
     filtro->liberar(&config);
 
     return 0;

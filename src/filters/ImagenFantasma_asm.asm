@@ -64,27 +64,15 @@ xor r13,r13
     xor r11, r11
     mov r11d, eax
 
-    ; movdqu xmm0, [rdi + r11]
+    movdqu xmm0, [rdi + r11]
 
-    ; pmovzxbd xmm9, xmm0  ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
-    ; psrldq xmm0, 4
-    ; pmovzxbd xmm10, xmm0 ; xmm10 : [aa_ext | rr_ext | gg_ext | bb_ext ] (2do px)
-    ; psrldq xmm0, 4
-    ; pmovzxbd xmm11, xmm0 ; xmm11 : [aa_ext | rr_ext | gg_ext | bb_ext ] (3er px)
-    ; psrldq xmm0, 4
-    ; pmovzxbd xmm12, xmm0 ; xmm12 : [aa_ext | rr_ext | gg_ext | bb_ext ] (4do px)
-
-    pmovzxbw xmm0, [rdi + r11]         ; xmm0 : [ aa_1 | rr_1 | gg_1 | bb_1 | aa_0 | rr_0 | gg_0 | bb_0 ]
-    pmovzxbw xmm1, [rdi + r11 + 8]     ; xmm1 : [ aa_3 | rr_3 | gg_3 | bb_3 | aa_2 | rr_2 | gg_2 | bb_2 ]
-
-
-    pmovzxwd xmm9, xmm0    ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
-    psrldq xmm0, 8
-    pmovzxwd xmm10, xmm0   ; xmm10 : [aa_ext | rr_ext | gg_ext | bb_ext ] (2do px)
-
-    pmovzxwd xmm11, xmm1   ; xmm11 : [aa_ext | rr_ext | gg_ext | bb_ext ] (3er px)
-    psrldq xmm1, 8
-    pmovzxwd xmm12, xmm1   ; xmm12 : [aa_ext | rr_ext | gg_ext | bb_ext ] (4do px)
+    pmovzxbd xmm9, xmm0  ; xmm9  : [aa_ext | rr_ext | gg_ext | bb_ext ] (1er px)
+    psrldq xmm0, 4
+    pmovzxbd xmm10, xmm0 ; xmm10 : [aa_ext | rr_ext | gg_ext | bb_ext ] (2do px)
+    psrldq xmm0, 4
+    pmovzxbd xmm11, xmm0 ; xmm11 : [aa_ext | rr_ext | gg_ext | bb_ext ] (3er px)
+    psrldq xmm0, 4
+    pmovzxbd xmm12, xmm0 ; xmm12 : [aa_ext | rr_ext | gg_ext | bb_ext ] (4do px)
 
 
     cvtdq2ps xmm9, xmm9   ; convierto int_32 a float
