@@ -1,1 +1,1 @@
-This group project consists of the implementation of three Image filters using SSE Instructions (Streaming SIMD Extensions) of the Intel x86-64 architecture, carried out for the subject "Computer Organization 2".
+This group project consists of the implementation of three Image filters using SSE Instructions (Streaming SIMD Extensions) of the Intel x86-64 architecture, carried out for the subject "Organization Of The Computer II" at the University of Buenos Aires. 
