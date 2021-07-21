@@ -36,4 +36,4 @@ This filter increases and decreases the brightness of an image based on the brig
 
 ## Examples of applying all three filters to an image
 
-![Examples Image](https://raw.githubusercontent.com/nahuelcastro/Digital-Image-Processing-SSE/filters_examples.png)
+![Examples Image](https://raw.https://github.com/nahuelcastro/Digital-Image-Processing-SSE/filters_examples.png)
