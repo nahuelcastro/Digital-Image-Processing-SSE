@@ -35,7 +35,4 @@ This filter highlights the edges and silhouettes of the image through a series o
 This filter increases and decreases the brightness of an image based on the brightness it already had. Two thresholds are passed per parameter, if the pixel exceeds the upper threshold, the brightness is increased, if the pixel is below the lower threshold, the brightness is decreased. The resulting effect is a differentiated shine enhancement.
 
 ## Examples of applying all three filters to an image
-
-![Examples Image](https://raw.https://github.com/nahuelcastro/Digital-Image-Processing-SSE/filters_examples.png)
-![Examples Image](../master/filters_examples.png)
-<img src="/filters_examples.png" alt="My cool logo"/>
+<img src="/filters_examples.png" alt="Examples Image"/>
