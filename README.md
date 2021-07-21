@@ -35,4 +35,16 @@ This filter highlights the edges and silhouettes of the image through a series o
 This filter increases and decreases the brightness of an image based on the brightness it already had. Two thresholds are passed per parameter, if the pixel exceeds the upper threshold, the brightness is increased, if the pixel is below the lower threshold, the brightness is decreased. The resulting effect is a differentiated shine enhancement.
 
 ## Examples of applying all three filters to an image
-<img src="/filters_examples.png" alt="Examples Image"/>
+<img src="/assets/filters_examples.png" alt="Examples Image"/>
+
+
+## Comparison of efficiency of implementations in ASM vs C with different compile optimizations (O0, O2, O3)
+For more details and more comparisons, see report.pdf
+
+<img src="/assets/ghost_ef.png" alt="ghost ef"/>
+<img src="/assets/border_ef.png" alt="ghost ef"/>
+<img src="/assets/brigthness_ef.png" alt="ghost ef"/>
+
+
+
+
